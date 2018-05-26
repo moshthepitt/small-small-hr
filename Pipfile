@@ -1,0 +1,23 @@
+[[source]]
+verify_ssl = true
+url = "https://pypi.org/simple"
+name = "pypi"
+
+[requires]
+python_version = "3.6"
+
+[packages]
+
+[dev-packages]
+"flake8" = "*"
+"pep8" = "*"
+pylint = "*"
+pycodestyle = "*"
+coverage = "*"
+tox = "*"
+yapf = "*"
+isort = "*"
+ipdb = "*"
+model-mommy = "*"
+"autopep8" = "*"
+tblib = "*"
