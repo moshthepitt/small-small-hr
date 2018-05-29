@@ -16,6 +16,9 @@ setup(
         'Django >= 2',
         'voluptuous',
         'psycopg2-binary',
+        'sorl-thumbnail',
+        'django-private-storage',
+        'django-phonenumber-field',
     ],
     classifiers=[
         'Programming Language :: Python',

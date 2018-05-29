@@ -12,6 +12,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # third party
+    'sorl.thumbnail',
+    'private_storage',
+    'phonenumber_field',
     # custom
     'small_small_hr.apps.SmallSmallHrConfig',
 ]
