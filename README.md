@@ -1,5 +1,7 @@
 # small-small-hr
 
+[![Build Status](https://travis-ci.org/moshthepitt/small-small-hr.svg?branch=master)](https://travis-ci.org/moshthepitt/small-small-hr)
+
 `small-small-hr` is a really really small and light-weight Django application that helps you (yes you!) to manage certain aspects of HR (human resource) in your small or large business/organization/whatever.
 
 ## Features
