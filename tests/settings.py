@@ -37,6 +37,9 @@ USE_TZ = True
 
 SECRET_KEY = "i love oov"
 
+PRIVATE_STORAGE_ROOT = '/path/to/private-media/'
+PRIVATE_STORAGE_AUTH_FUNCTION = 'private_storage.permissions.allow_staff'
+
 # try and load local_settings if present
 try:
     # pylint: disable=wildcard-import
