@@ -29,6 +29,27 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
+class Role(TimeStampedModel, models.Model):
+    """
+    Model class for staff member role
+    """
+    name = models.CharField(_('Name'), max_length=255)
+    description = models.TextField(_('Description'), blank=True, default='')
+
+    class Meta(object):  # pylint: disable=too-few-public-methods
+        """
+        Meta options for StaffDocument
+        """
+        abstract = False
+        verbose_name = _('Role')
+        verbose_name_plural = _('Roles')
+        ordering = ['name', 'created']
+
+    def __str__(self):
+        # pylint: disable=no-member
+        return self.name
+
+
 class StaffProfile(TimeStampedModel, models.Model):
     """
     StaffProfile model class
@@ -53,13 +74,25 @@ class StaffProfile(TimeStampedModel, models.Model):
         USER, verbose_name=_('User'), on_delete=models.CASCADE)
     sex = models.CharField(_('Gender'), choices=SEX_CHOICES, max_length=1,
                            default=NOT_KNOWN, blank=True)
+    role = models.ForeignKey(Role, verbose_name=_('Role'), blank=True,
+                             default=None, null=True,
+                             on_delete=models.SET_NULL)
+    address = models.TextField(_('Addresss'), blank=True, default="")
     birthday = models.DateField(_('Birth day'), blank=True, default=None,
                                 null=True)
     leave_days = models.PositiveIntegerField(
         _('Leave days'), default=21, blank=True,
         help_text=_('Number of leave days allowed in a year.'))
+    sick_days = models.PositiveIntegerField(
+        _('Sick days'), default=21, blank=True,
+        help_text=_('Number of sick days allowed in a year.'))
     overtime_allowed = models.BooleanField(
         _('Overtime allowed'), blank=True, default=False)
+    start_date = models.DateField(
+        _('Start Date'), help_text=_('The start date of employment'))
+    end_date = models.DateField(
+        _('End Date'), null=True, default=None, blank=True,
+        help_text=_('The end date of employment'))
     data = JSONField(_('Data'), default=dict, blank=True)
 
     class Meta(object):  # pylint: disable=too-few-public-methods

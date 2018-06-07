@@ -22,6 +22,15 @@ class TestScamModels(TestCase):
         staff = mommy.make('small_small_hr.StaffProfile', user=user)
         self.assertEqual('Mosh Pitt', staff.__str__())
 
+    def test_role_str(self):
+        """
+        Test __str__ method on Role
+        """
+        self.assertEqual(
+            'Accountant',
+            mommy.make('small_small_hr.Role', name='Accountant').__str__()
+        )
+
     def test_staffdocument_str(self):
         """
         Test __str__ method on StaffDocument
@@ -36,7 +45,7 @@ class TestScamModels(TestCase):
 
     def test_leave_str(self):
         """
-        Test __str__ method on StaffDocument
+        Test __str__ method on Leave
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
         staff = mommy.make('small_small_hr.StaffProfile', user=user)
