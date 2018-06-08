@@ -16,6 +16,7 @@ INSTALLED_APPS = [
     'sorl.thumbnail',
     'private_storage',
     'phonenumber_field',
+    'crispy_forms',
     # custom
     'small_small_hr.apps.SmallSmallHrConfig',
 ]

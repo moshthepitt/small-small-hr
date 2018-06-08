@@ -30,6 +30,13 @@
             ],
             "version": "==2.0.6"
         },
+        "django-crispy-forms": {
+            "hashes": [
+                "sha256:5952bab971110d0b86c278132dae0aa095beee8f723e625c3d3fa28888f1675f",
+                "sha256:705ededc554ad8736157c666681165fe22ead2dec0d5446d65fc9dd976a5a876"
+            ],
+            "version": "==1.7.2"
+        },
         "django-phonenumber-field": {
             "hashes": [
                 "sha256:d96c274a6aa9afd4eb4fe922e475a45706d997b2bea22b87f3afc9fb0012db84"

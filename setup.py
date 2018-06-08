@@ -19,6 +19,7 @@ setup(
         'sorl-thumbnail',
         'django-private-storage',
         'django-phonenumber-field',
+        'django-crispy-forms',
     ],
     classifiers=[
         'Programming Language :: Python',

@@ -5,6 +5,8 @@ from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext as _
+
+from phonenumber_field.modelfields import PhoneNumberField
 from private_storage.fields import PrivateFileField
 
 USER = settings.AUTH_USER_MODEL
@@ -77,6 +79,7 @@ class StaffProfile(TimeStampedModel, models.Model):
     role = models.ForeignKey(Role, verbose_name=_('Role'), blank=True,
                              default=None, null=True,
                              on_delete=models.SET_NULL)
+    phone = PhoneNumberField(_('Phone'), blank=True, default='')
     address = models.TextField(_('Addresss'), blank=True, default="")
     birthday = models.DateField(_('Birth day'), blank=True, default=None,
                                 null=True)
@@ -89,7 +92,8 @@ class StaffProfile(TimeStampedModel, models.Model):
     overtime_allowed = models.BooleanField(
         _('Overtime allowed'), blank=True, default=False)
     start_date = models.DateField(
-        _('Start Date'), help_text=_('The start date of employment'))
+        _('Start Date'), null=True, default=None, blank=True,
+        help_text=_('The start date of employment'))
     end_date = models.DateField(
         _('End Date'), null=True, default=None, blank=True,
         help_text=_('The end date of employment'))
