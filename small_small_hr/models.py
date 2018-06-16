@@ -123,15 +123,43 @@ class StaffProfile(TimeStampedModel, models.Model):
         # pylint: disable=no-member
         return f'{self.user.first_name} {self.user.last_name}'
 
-    def get_leave_days_count(self):
+    def get_approved_leave_days(self):
         """
-        Get the numer of leave days that the staff member has used up
+        Get approved leave days
+        """
+        queryset = self.leave_set.filter(
+            status=Leave.APPROVED,
+            leave_type=Leave.REGULAR).annotate(
+                duration=models.F('end')-models.F('start'))
+        return queryset.aggregate(
+            leave=Coalesce(Sum('duration'),
+                           V(timedelta(days=0))))['leave']
 
-        returns timedelta
+    def get_approved_sick_days(self):
         """
-        total = self.leave_set.aggregate(
-            leave=Coalesce(Sum('duration'), V(timedelta(days=0))))
-        return total['leave']
+        Get approved leave days
+        """
+        queryset = self.leave_set.filter(
+            status=Leave.APPROVED,
+            leave_type=Leave.SICK).annotate(
+                duration=models.F('end')-models.F('start'))
+        return queryset.aggregate(
+            leave=Coalesce(Sum('duration'),
+                           V(timedelta(days=0))))['leave']
+
+    def get_available_leave_days(self):
+        """
+        Get available leave days
+        """
+        return timedelta(days=self.leave_days) -\
+            self.get_approved_leave_days()
+
+    def get_available_sick_days(self):
+        """
+        Get available sick days
+        """
+        return timedelta(days=self.sick_days) -\
+            self.get_approved_sick_days()
 
     def __str__(self):
         return self.get_name()

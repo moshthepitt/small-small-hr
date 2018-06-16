@@ -8,8 +8,10 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
+from small_small_hr.models import Leave
 
-class TestScamModels(TestCase):
+
+class TestModels(TestCase):
     """
     Test class for Scam models
     """
@@ -22,20 +24,39 @@ class TestScamModels(TestCase):
         staff = user.staffprofile
         self.assertEqual('Mosh Pitt', staff.__str__())
 
-    def test_get_leave_days_count(self):
+    def test_get_approved_leave_days(self):
         """
-        Test get_leave_days_count
+        Test get_approved_leave_days
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
         staff = user.staffprofile
         mommy.make(
             'small_small_hr.Leave', staff=staff, start=timezone.now(),
-            end=timezone.now() + timedelta(days=6))
+            end=timezone.now() + timedelta(days=6), leave_type=Leave.REGULAR,
+            status=Leave.APPROVED)
         mommy.make(
             'small_small_hr.Leave', staff=staff, start=timezone.now(),
-            end=timezone.now() + timedelta(days=5))
+            end=timezone.now() + timedelta(days=5), leave_type=Leave.REGULAR,
+            status=Leave.APPROVED)
         self.assertEqual(timedelta(days=11).days,
-                         staff.get_leave_days_count().days)
+                         staff.get_approved_leave_days().days)
+
+    def test_get_approved_sick_days(self):
+        """
+        Test get_approved_sick_days
+        """
+        user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
+        staff = user.staffprofile
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=timezone.now(),
+            end=timezone.now() + timedelta(days=4), leave_type=Leave.SICK,
+            status=Leave.APPROVED)
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=timezone.now(),
+            end=timezone.now() + timedelta(days=3), leave_type=Leave.SICK,
+            status=Leave.APPROVED)
+        self.assertEqual(timedelta(days=7).days,
+                         staff.get_approved_sick_days().days)
 
     def test_role_str(self):
         """
