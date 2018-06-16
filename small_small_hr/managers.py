@@ -4,7 +4,7 @@ Small small HR model managers module
 from django.db import models
 
 
-class LeaveManager(models.Manager):
+class LeaveManager(models.Manager):  # pylint: disable=too-few-public-methods
     """
     Custom manager for Leave model
     """

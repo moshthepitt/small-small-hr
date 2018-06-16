@@ -127,6 +127,7 @@ class StaffProfile(TimeStampedModel, models.Model):
         """
         Get approved leave days
         """
+        # pylint: disable=no-member
         queryset = self.leave_set.filter(
             status=Leave.APPROVED,
             leave_type=Leave.REGULAR).annotate(
@@ -139,6 +140,7 @@ class StaffProfile(TimeStampedModel, models.Model):
         """
         Get approved leave days
         """
+        # pylint: disable=no-member
         queryset = self.leave_set.filter(
             status=Leave.APPROVED,
             leave_type=Leave.SICK).annotate(
