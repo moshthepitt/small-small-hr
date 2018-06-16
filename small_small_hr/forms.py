@@ -94,6 +94,7 @@ class StaffProfileAdminForm(forms.ModelForm):
         Check if id number is unique
         """
         value = self.cleaned_data.get('id_number')
+        # pylint: disable=no-member
         if StaffProfile.objects.exclude(
                 id=self.instance.id).filter(data__id_number=value).exists():
             raise forms.ValidationError(
@@ -105,6 +106,7 @@ class StaffProfileAdminForm(forms.ModelForm):
         Check if NSSF number is unique
         """
         value = self.cleaned_data.get('nssf')
+        # pylint: disable=no-member
         if StaffProfile.objects.exclude(
                 id=self.instance.id).filter(data__nssf=value).exists():
             raise forms.ValidationError(
@@ -116,6 +118,7 @@ class StaffProfileAdminForm(forms.ModelForm):
         Check if NHIF number is unique
         """
         value = self.cleaned_data.get('nhif')
+        # pylint: disable=no-member
         if StaffProfile.objects.exclude(
                 id=self.instance.id).filter(data__nhif=value).exists():
             raise forms.ValidationError(
@@ -127,13 +130,14 @@ class StaffProfileAdminForm(forms.ModelForm):
         Check if PIN number is unique
         """
         value = self.cleaned_data.get('pin_number')
+        # pylint: disable=no-member
         if StaffProfile.objects.exclude(
                 id=self.instance.id).filter(data__pin_number=value).exists():
             raise forms.ValidationError(
                 _('This PIN number is already in use.'))
         return value
 
-    def save(self):
+    def save(self, commit=True):  # pylint: disable=unused-argument
         """
         Custom save method
         """

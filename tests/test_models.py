@@ -19,7 +19,7 @@ class TestScamModels(TestCase):
         Test that the __str__ method on StaffProfile works
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = mommy.make('small_small_hr.StaffProfile', user=user)
+        staff = user.staffprofile
         self.assertEqual('Mosh Pitt', staff.__str__())
 
     def test_role_str(self):
@@ -36,7 +36,7 @@ class TestScamModels(TestCase):
         Test __str__ method on StaffDocument
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = mommy.make('small_small_hr.StaffProfile', user=user)
+        staff = user.staffprofile
         self.assertEqual(
             'Mosh Pitt - Dossier',
             mommy.make(
@@ -48,7 +48,7 @@ class TestScamModels(TestCase):
         Test __str__ method on Leave
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = mommy.make('small_small_hr.StaffProfile', user=user)
+        staff = user.staffprofile
         now = timezone.now()
         end = now + timedelta(days=3)
         self.assertEqual(
@@ -62,7 +62,7 @@ class TestScamModels(TestCase):
         Test __str__ method on OverTime
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = mommy.make('small_small_hr.StaffProfile', user=user)
+        staff = user.staffprofile
         now = timezone.now()
         end = now + timedelta(seconds=60 * 60 * 3)
         self.assertEqual(
