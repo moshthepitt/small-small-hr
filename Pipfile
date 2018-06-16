@@ -7,7 +7,7 @@ name = "pypi"
 python_version = "3.6"
 
 [packages]
-"e1839a8" = {editable = true, path = "."}
+"e1839a8" = {path = ".", editable = true}
 
 [dev-packages]
 "flake8" = "*"

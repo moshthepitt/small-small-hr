@@ -20,6 +20,7 @@ setup(
         'django-private-storage',
         'django-phonenumber-field',
         'django-crispy-forms',
+        'djangorestframework'
     ],
     classifiers=[
         'Programming Language :: Python',

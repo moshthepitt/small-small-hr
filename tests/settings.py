@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'private_storage',
     'phonenumber_field',
     'crispy_forms',
+    'rest_framework',
     # custom
     'small_small_hr.apps.SmallSmallHrConfig',
 ]
