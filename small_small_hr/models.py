@@ -268,6 +268,9 @@ class OverTime(BaseStaffRequest):
     """
     Overtime model class
     """
+    date = models.DateField(_('Date'), auto_now=False, auto_now_add=False)
+    start = models.TimeField(_('Start'), auto_now=False, auto_now_add=False)
+    end = models.TimeField(_('End'), auto_now=False, auto_now_add=False)
 
     class Meta(object):  # pylint: disable=too-few-public-methods
         """
@@ -276,9 +279,9 @@ class OverTime(BaseStaffRequest):
         abstract = False
         verbose_name = _('Overtime')
         verbose_name_plural = _('Overtime')
-        ordering = ['staff', 'start']
+        ordering = ['staff', 'date', 'start']
 
     def __str__(self):
         # pylint: disable=no-member
         name = self.staff.get_name()
-        return _(f'{name}: {self.start.time()} to {self.end.time()}')
+        return _(f'{name}: {self.date} from {self.start} to {self.end}')

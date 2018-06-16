@@ -102,7 +102,8 @@ class TestModels(TestCase):
         now = timezone.now()
         end = now + timedelta(seconds=60 * 60 * 3)
         self.assertEqual(
-            f'Mosh Pitt: {now.time()} to {end.time()}',
+            f'Mosh Pitt: {now.date()} from {now.time()} to {end.time()}',
             mommy.make(
-                'small_small_hr.OverTime', start=now, end=end,
+                'small_small_hr.OverTime', date=now.date(),
+                start=now.time(), end=end.time(),
                 staff=staff).__str__())
