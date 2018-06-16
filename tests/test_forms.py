@@ -2,14 +2,18 @@
 Module to test small_small_hr models
 """
 import os
-from django.core.files.uploadedfile import SimpleUploadedFile
+from datetime import timedelta
+
 from django.contrib.auth.models import AnonymousUser
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
+from django.utils import timezone
 
 from model_mommy import mommy
 
-from small_small_hr.forms import StaffDocumentForm, StaffProfileAdminForm
-from small_small_hr.models import StaffProfile
+from small_small_hr.forms import (LeaveForm, StaffDocumentForm,
+                                  StaffProfileAdminForm)
+from small_small_hr.models import Leave, StaffProfile
 from small_small_hr.serializers import StaffProfileSerializer
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -25,6 +29,269 @@ class TestForms(TestCase):
         Setup test class
         """
         self.factory = RequestFactory()
+
+    def test_leaveform_apply(self):
+        """
+        Test LeaveForm apply for leave
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+        staffprofile.leave_days = 21
+        staffprofile.sick_days = 10
+        staffprofile.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        start = timezone.now()
+        end = start + timedelta(days=7)
+
+        data = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.REGULAR,
+            'start': start,
+            'end': end,
+            'reason': 'Need a break',
+        }
+
+        form = LeaveForm(data=data)
+        self.assertTrue(form.is_valid())
+        leave = form.save()
+        self.assertEqual(staffprofile, leave.staff)
+        self.assertEqual(Leave.REGULAR, leave.leave_type)
+        self.assertEqual(start, leave.start)
+        self.assertEqual(end, leave.end)
+        self.assertEqual(
+            timedelta(days=7).days, (leave.end - leave.start).days)
+        self.assertEqual('Need a break', leave.reason)
+        self.assertEqual(Leave.PENDING, leave.status)
+        self.assertEqual('', leave.comments)
+
+    def test_leaveform_process(self):
+        """
+        Test LeaveForm process
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+        staffprofile.leave_days = 21
+        staffprofile.sick_days = 10
+        staffprofile.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        start = timezone.now()
+        end = start + timedelta(days=7)
+
+        data = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.REGULAR,
+            'start': start,
+            'end': end,
+            'reason': 'Need a break',
+            'comments': 'Just no',
+            'status': Leave.REJECTED
+        }
+
+        form = LeaveForm(data=data)
+        self.assertTrue(form.is_valid())
+        leave = form.save()
+        self.assertEqual(staffprofile, leave.staff)
+        self.assertEqual(Leave.REGULAR, leave.leave_type)
+        self.assertEqual(start, leave.start)
+        self.assertEqual(end, leave.end)
+        self.assertEqual(
+            timedelta(days=7).days, (leave.end - leave.start).days)
+        self.assertEqual('Need a break', leave.reason)
+        self.assertEqual(Leave.REJECTED, leave.status)
+        self.assertEqual('Just no', leave.comments)
+
+    def test_sickleave_apply(self):
+        """
+        Test LeaveForm apply for sick leave
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+        staffprofile.leave_days = 21
+        staffprofile.sick_days = 10
+        staffprofile.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        start = timezone.now()
+        end = start + timedelta(days=7)
+
+        data = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.SICK,
+            'start': start,
+            'end': end,
+            'reason': 'Need a break',
+        }
+
+        form = LeaveForm(data=data)
+        self.assertTrue(form.is_valid())
+        leave = form.save()
+        self.assertEqual(staffprofile, leave.staff)
+        self.assertEqual(Leave.SICK, leave.leave_type)
+        self.assertEqual(start, leave.start)
+        self.assertEqual(end, leave.end)
+        self.assertEqual(
+            timedelta(days=7).days, (leave.end - leave.start).days)
+        self.assertEqual('Need a break', leave.reason)
+        self.assertEqual(Leave.PENDING, leave.status)
+        self.assertEqual('', leave.comments)
+
+    def test_sickleave_process(self):
+        """
+        Test LeaveForm process sick leave
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+        staffprofile.leave_days = 21
+        staffprofile.sick_days = 10
+        staffprofile.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        start = timezone.now()
+        end = start + timedelta(days=7)
+
+        data = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.SICK,
+            'start': start,
+            'end': end,
+            'reason': 'Need a break',
+            'comments': 'Just no',
+            'status': Leave.REJECTED
+        }
+
+        form = LeaveForm(data=data)
+        self.assertTrue(form.is_valid())
+        leave = form.save()
+        self.assertEqual(staffprofile, leave.staff)
+        self.assertEqual(Leave.SICK, leave.leave_type)
+        self.assertEqual(start, leave.start)
+        self.assertEqual(end, leave.end)
+        self.assertEqual(
+            timedelta(days=7).days, (leave.end - leave.start).days)
+        self.assertEqual('Need a break', leave.reason)
+        self.assertEqual(Leave.REJECTED, leave.status)
+        self.assertEqual('Just no', leave.comments)
+
+    def test_leaveform_start_end(self):
+        """
+        Test start < end
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+        staffprofile.leave_days = 21
+        staffprofile.sick_days = 10
+        staffprofile.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        start = timezone.now()
+        end = start - timedelta(days=1)
+
+        data = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.SICK,
+            'start': start,
+            'end': end,
+            'reason': 'Need a break'
+        }
+
+        form = LeaveForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(1, len(form.errors.keys()))
+        self.assertEqual(
+            'end must be greater than start',
+            form.errors['end'][0]
+        )
+
+    def test_leaveform_max_days(self):
+        """
+        Test leave days sufficient
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+        staffprofile.leave_days = 21
+        staffprofile.sick_days = 10
+        staffprofile.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        start = timezone.now()
+        end = start + timedelta(days=32)
+
+        data = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.REGULAR,
+            'start': start,
+            'end': end,
+            'reason': 'Need a break'
+        }
+
+        form = LeaveForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(2, len(form.errors.keys()))
+        self.assertEqual(
+            'Not enough leave days. Available leave days are 21',
+            form.errors['start'][0]
+        )
+        self.assertEqual(
+            'Not enough leave days. Available leave days are 21',
+            form.errors['end'][0]
+        )
+
+    def test_leaveform_max_sick_days(self):
+        """
+        Test sick days sufficient
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+        staffprofile.leave_days = 21
+        staffprofile.sick_days = 10
+        staffprofile.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        start = timezone.now()
+        end = start + timedelta(days=12)
+
+        data = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.SICK,
+            'start': start,
+            'end': end,
+            'reason': 'Need a break'
+        }
+
+        form = LeaveForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(2, len(form.errors.keys()))
+        self.assertEqual(
+            'Not enough sick days. Available sick days are 10',
+            form.errors['start'][0]
+        )
+        self.assertEqual(
+            'Not enough sick days. Available sick days are 10',
+            form.errors['end'][0]
+        )
 
     def test_staffdocumentform(self):
         """
