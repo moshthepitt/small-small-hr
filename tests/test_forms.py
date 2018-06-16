@@ -1,15 +1,18 @@
 """
 Module to test small_small_hr models
 """
-
+import os
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
 
 from model_mommy import mommy
 
-from small_small_hr.forms import StaffProfileAdminForm
+from small_small_hr.forms import StaffDocumentForm, StaffProfileAdminForm
 from small_small_hr.models import StaffProfile
 from small_small_hr.serializers import StaffProfileSerializer
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
 class TestForms(TestCase):
@@ -22,6 +25,49 @@ class TestForms(TestCase):
         Setup test class
         """
         self.factory = RequestFactory()
+
+    def test_staffdocumentform(self):
+        """
+        Test StaffDocumentForm
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        path = os.path.join(
+            BASE_DIR, 'tests', 'fixtures', 'contract.pdf')
+
+        with self.settings(MEDIA_ROOT='/tmp', PRIVATE_STORAGE_ROOT='/tmp'):
+            with open(path, 'r+b') as contract_file:
+                data = {
+                    'staff': staffprofile.id,
+                    'name': 'Employment Contract',
+                    'description': 'This is the employment contract!',
+                    'file': contract_file
+                }
+
+                file_dict = {
+                    'file': SimpleUploadedFile(
+                        name=contract_file.name,
+                        content=contract_file.read(),
+                        content_type='application/pdf'
+                    )}
+
+                form = StaffDocumentForm(data, file_dict)
+
+                self.assertTrue(form.is_valid())
+                doc = form.save()
+
+                self.assertEqual(staffprofile, doc.staff)
+                self.assertEqual('Employment Contract', doc.name)
+                self.assertEqual(
+                    'This is the employment contract!', doc.description)
+
+        with open(path, 'r+b') as contract_file:
+            self.assertTrue(contract_file.read(), doc.file.read())
 
     def test_staff_profile_admin_form(self):
         """
