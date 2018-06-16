@@ -11,8 +11,8 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from small_small_hr.forms import (LeaveForm, OverTimeForm, StaffDocumentForm,
-                                  StaffProfileAdminForm)
+from small_small_hr.forms import (LeaveForm, OverTimeForm, RoleForm,
+                                  StaffDocumentForm, StaffProfileAdminForm)
 from small_small_hr.models import Leave, StaffProfile
 from small_small_hr.serializers import StaffProfileSerializer
 
@@ -29,6 +29,25 @@ class TestForms(TestCase):
         Setup test class
         """
         self.factory = RequestFactory()
+
+    def test_role_form(self):
+        """
+        Test RoleForm
+        """
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        data = {
+            'name': 'Accountant',
+            'description': 'Keep accounts'
+        }
+
+        form = RoleForm(data=data)
+        self.assertTrue(form.is_valid())
+        role = form.save()
+        self.assertEqual('Accountant', role.name)
+        self.assertEqual('Keep accounts', role.description)
 
     def test_overtime_form(self):
         """

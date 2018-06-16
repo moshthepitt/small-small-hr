@@ -9,7 +9,42 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
 from phonenumber_field.formfields import PhoneNumberField
 
-from small_small_hr.models import Leave, OverTime, StaffDocument, StaffProfile
+from small_small_hr.models import (Leave, OverTime, Role, StaffDocument,
+                                   StaffProfile)
+
+
+class RoleForm(forms.ModelForm):
+    """
+    Form used when managing Role objects
+    """
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """
+        Class meta options
+        """
+        model = Role
+        fields = [
+            'name',
+            'description'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = True
+        self.helper.form_method = 'post'
+        self.helper.render_required_fields = True
+        self.helper.form_show_labels = True
+        self.helper.html5_required = True
+        self.helper.form_id = 'role-form'
+        self.helper.layout = Layout(
+            Field('name',),
+            Field('description',),
+            FormActions(
+                Submit('submitBtn', _('Submit'), css_class='btn-primary'),
+            )
+        )
 
 
 class OverTimeForm(forms.ModelForm):
