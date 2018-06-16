@@ -9,7 +9,63 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
 from phonenumber_field.formfields import PhoneNumberField
 
-from small_small_hr.models import Leave, StaffDocument, StaffProfile
+from small_small_hr.models import Leave, OverTime, StaffDocument, StaffProfile
+
+
+class OverTimeForm(forms.ModelForm):
+    """
+    Form used when managing OverTime objects
+    """
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """
+        Class meta options
+        """
+        model = OverTime
+        fields = [
+            'staff',
+            'date',
+            'start',
+            'end',
+            'reason',
+            'status',
+            'comments'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = True
+        self.helper.form_method = 'post'
+        self.helper.render_required_fields = True
+        self.helper.form_show_labels = True
+        self.helper.html5_required = True
+        self.helper.form_id = 'overtime-form'
+        self.helper.layout = Layout(
+            Field('staff',),
+            Field('date',),
+            Field('start',),
+            Field('end',),
+            Field('reason',),
+            Field('status',),
+            Field('comments'),
+            FormActions(
+                Submit('submitBtn', _('Submit'), css_class='btn-primary'),
+            )
+        )
+
+    def clean(self):
+        """
+        Custom clean method
+        """
+        cleaned_data = super().clean()
+        end = cleaned_data.get('end')
+        start = cleaned_data.get('start')
+
+        # end must be later than start
+        if end <= start:
+            self.add_error('end', _("end must be greater than start"))
 
 
 class LeaveForm(forms.ModelForm):
@@ -57,7 +113,7 @@ class LeaveForm(forms.ModelForm):
 
     def clean(self):
         """
-        validate leave days
+        Custom clean method
         """
         cleaned_data = super().clean()
         leave_type = cleaned_data.get('leave_type')
