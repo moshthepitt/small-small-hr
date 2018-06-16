@@ -8,7 +8,7 @@ from model_mommy import mommy
 from small_small_hr.serializers import StaffProfileSerializer
 
 
-class TestScamModels(TestCase):
+class TestSerializers(TestCase):
     """
     Test class for Scam models
     """
