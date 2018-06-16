@@ -22,6 +22,21 @@ class TestScamModels(TestCase):
         staff = user.staffprofile
         self.assertEqual('Mosh Pitt', staff.__str__())
 
+    def test_get_leave_days_count(self):
+        """
+        Test get_leave_days_count
+        """
+        user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
+        staff = user.staffprofile
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=timezone.now(),
+            end=timezone.now() + timedelta(days=6))
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=timezone.now(),
+            end=timezone.now() + timedelta(days=5))
+        self.assertEqual(timedelta(days=11).days,
+                         staff.get_leave_days_count().days)
+
     def test_role_str(self):
         """
         Test __str__ method on Role

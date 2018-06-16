@@ -1,13 +1,20 @@
 """
 Models module for small_small_hr
 """
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.db.models import Value as V
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext as _
 
 from phonenumber_field.modelfields import PhoneNumberField
 from private_storage.fields import PrivateFileField
+
+from small_small_hr.managers import LeaveManager
 
 USER = settings.AUTH_USER_MODEL
 
@@ -87,7 +94,7 @@ class StaffProfile(TimeStampedModel, models.Model):
         _('Leave days'), default=21, blank=True,
         help_text=_('Number of leave days allowed in a year.'))
     sick_days = models.PositiveIntegerField(
-        _('Sick days'), default=21, blank=True,
+        _('Sick days'), default=10, blank=True,
         help_text=_('Number of sick days allowed in a year.'))
     overtime_allowed = models.BooleanField(
         _('Overtime allowed'), blank=True, default=False)
@@ -115,6 +122,16 @@ class StaffProfile(TimeStampedModel, models.Model):
         """
         # pylint: disable=no-member
         return f'{self.user.first_name} {self.user.last_name}'
+
+    def get_leave_days_count(self):
+        """
+        Get the numer of leave days that the staff member has used up
+
+        returns timedelta
+        """
+        total = self.leave_set.aggregate(
+            leave=Coalesce(Sum('duration'), V(timedelta(days=0))))
+        return total['leave']
 
     def __str__(self):
         return self.get_name()
@@ -190,6 +207,19 @@ class Leave(BaseStaffRequest):
     """
     Leave model class
     """
+    SICK = '1'
+    REGULAR = '2'
+
+    TYPE_CHOICES = (
+        (SICK, _('Sick Leave')),
+        (REGULAR, _('Regular Leave')),
+    )
+
+    leave_type = models.CharField(
+        _('Type'), max_length=1, choices=TYPE_CHOICES, default=REGULAR,
+        blank=True)
+
+    objects = LeaveManager()
 
     class Meta(object):  # pylint: disable=too-few-public-methods
         """
@@ -199,6 +229,7 @@ class Leave(BaseStaffRequest):
         verbose_name = _('Leave')
         verbose_name_plural = _('Leave')
         ordering = ['staff', 'start']
+        # base_manager_name = self.objects
 
     def __str__(self):
         # pylint: disable=no-member
