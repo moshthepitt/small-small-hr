@@ -2,11 +2,14 @@
 Module to test small_small_hr models
 """
 
-from django.test import RequestFactory, TestCase
 from django.contrib.auth.models import AnonymousUser
+from django.test import RequestFactory, TestCase
+
+from model_mommy import mommy
+
 from small_small_hr.forms import StaffProfileAdminForm
 from small_small_hr.models import StaffProfile
-from model_mommy import mommy
+from small_small_hr.serializers import StaffProfileSerializer
 
 
 class TestForms(TestCase):
@@ -83,3 +86,125 @@ class TestForms(TestCase):
                          staffprofile.data['emergency_contact_name'])
         self.assertEqual('+254722111111',
                          staffprofile.data['emergency_contact_number'])
+
+    def test_staffprofile_unique_pin_number(self):
+        """
+        Test unique pin_number
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+        staffprofile.data['id_number'] = '123456789'
+        staffprofile.data['pin_number'] = '123456789'
+        staffprofile.save()
+
+        user2 = mommy.make('auth.User', first_name='Kyle', last_name='Ndoe')
+        staffprofile2 = user2.staffprofile
+        staffprofile2.data['id_number'] = '9999999'
+        staffprofile2.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        data = StaffProfileSerializer(staffprofile2).data
+        data['pin_number'] = '123456789'
+
+        form = StaffProfileAdminForm(data=data,
+                                     instance=staffprofile2,
+                                     request=request)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            'This PIN number is already in use.',
+            form.errors['pin_number'][0]
+        )
+
+    def test_staffprofile_unique_id_number(self):
+        """
+        Test unique id_number
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+        staffprofile.data['id_number'] = '123456789'
+        staffprofile.save()
+
+        user2 = mommy.make('auth.User', first_name='Kyle', last_name='Ndoe')
+        staffprofile2 = user2.staffprofile
+        staffprofile2.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        data = StaffProfileSerializer(staffprofile2).data
+        data['id_number'] = '123456789'
+
+        form = StaffProfileAdminForm(data=data,
+                                     instance=staffprofile2,
+                                     request=request)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            'This id number is already in use.',
+            form.errors['id_number'][0]
+        )
+
+    def test_staffprofile_unique_nssf(self):
+        """
+        Test unique NSSF
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+        staffprofile.data['id_number'] = '123456789'
+        staffprofile.data['nssf'] = '123456789'
+        staffprofile.save()
+
+        user2 = mommy.make('auth.User', first_name='Kyle', last_name='Ndoe')
+        staffprofile2 = user2.staffprofile
+        staffprofile2.data['id_number'] = '9999999'
+        staffprofile2.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        data = StaffProfileSerializer(staffprofile2).data
+        data['nssf'] = '123456789'
+
+        form = StaffProfileAdminForm(data=data,
+                                     instance=staffprofile2,
+                                     request=request)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            'This NSSF number is already in use.',
+            form.errors['nssf'][0]
+        )
+
+    def test_staffprofile_unique_nhif(self):
+        """
+        Test unique NHIF
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+        staffprofile.data['id_number'] = '123456789'
+        staffprofile.data['nhif'] = '123456789'
+        staffprofile.save()
+
+        user2 = mommy.make('auth.User', first_name='Kyle', last_name='Ndoe')
+        staffprofile2 = user2.staffprofile
+        staffprofile2.data['id_number'] = '9999999'
+        staffprofile2.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        data = StaffProfileSerializer(staffprofile2).data
+        data['nhif'] = '123456789'
+
+        form = StaffProfileAdminForm(data=data,
+                                     instance=staffprofile2,
+                                     request=request)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            'This NHIF number is already in use.',
+            form.errors['nhif'][0]
+        )
