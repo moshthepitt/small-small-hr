@@ -1,7 +1,7 @@
 """
 Models module for small_small_hr
 """
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
@@ -285,3 +285,11 @@ class OverTime(BaseStaffRequest):
         # pylint: disable=no-member
         name = self.staff.get_name()
         return _(f'{name}: {self.date} from {self.start} to {self.end}')
+
+    def get_duration(self):
+        """
+        Get duration
+        """
+        start = datetime.combine(self.date, self.start)
+        end = datetime.combine(self.date, self.end)
+        return end - start

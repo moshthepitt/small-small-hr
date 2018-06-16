@@ -107,3 +107,18 @@ class TestModels(TestCase):
                 'small_small_hr.OverTime', date=now.date(),
                 start=now.time(), end=end.time(),
                 staff=staff).__str__())
+
+    def test_overtime_duration(self):
+        """
+        Test get_duration method on OverTime
+        """
+        user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
+        staff = user.staffprofile
+        now = timezone.now()
+        end = now + timedelta(seconds=60 * 60 * 3)
+        self.assertEqual(
+            timedelta(seconds=60 * 60 * 3).seconds,
+            mommy.make(
+                'small_small_hr.OverTime', date=now.date(),
+                start=now.time(), end=end.time(),
+                staff=staff).get_duration().seconds)
