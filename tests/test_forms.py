@@ -113,6 +113,7 @@ class TestForms(TestCase):
                                      instance=staffprofile2,
                                      request=request)
         self.assertFalse(form.is_valid())
+        self.assertEqual(1, len(form.errors.keys()))
         self.assertEqual(
             'This PIN number is already in use.',
             form.errors['pin_number'][0]
@@ -142,6 +143,7 @@ class TestForms(TestCase):
                                      instance=staffprofile2,
                                      request=request)
         self.assertFalse(form.is_valid())
+        self.assertEqual(1, len(form.errors.keys()))
         self.assertEqual(
             'This id number is already in use.',
             form.errors['id_number'][0]
@@ -173,6 +175,7 @@ class TestForms(TestCase):
                                      instance=staffprofile2,
                                      request=request)
         self.assertFalse(form.is_valid())
+        self.assertEqual(1, len(form.errors.keys()))
         self.assertEqual(
             'This NSSF number is already in use.',
             form.errors['nssf'][0]
@@ -204,6 +207,7 @@ class TestForms(TestCase):
                                      instance=staffprofile2,
                                      request=request)
         self.assertFalse(form.is_valid())
+        self.assertEqual(1, len(form.errors.keys()))
         self.assertEqual(
             'This NHIF number is already in use.',
             form.errors['nhif'][0]
