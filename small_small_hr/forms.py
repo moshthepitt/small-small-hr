@@ -179,6 +179,46 @@ class LeaveForm(forms.ModelForm):
                 self.add_error('end', msg)
 
 
+class ApplyLeaveForm(LeaveForm):
+    """
+    Form used when applying for Leave
+    """
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """
+        Class meta options
+        """
+        model = Leave
+        fields = [
+            'staff',
+            'leave_type',
+            'start',
+            'end',
+            'reason',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = True
+        self.helper.form_method = 'post'
+        self.helper.render_required_fields = True
+        self.helper.form_show_labels = True
+        self.helper.html5_required = True
+        self.helper.form_id = 'leave-form'
+        self.helper.layout = Layout(
+            Field('staff',),
+            Field('leave_type',),
+            Field('start',),
+            Field('end',),
+            Field('reason',),
+            FormActions(
+                Submit('submitBtn', _('Submit'), css_class='btn-primary'),
+            )
+        )
+
+
 class StaffDocumentForm(forms.ModelForm):
     """
     Form used when managing StaffDocument objects

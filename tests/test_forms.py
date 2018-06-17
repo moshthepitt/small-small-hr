@@ -13,8 +13,9 @@ from django.utils import timezone
 import pytz
 from model_mommy import mommy
 
-from small_small_hr.forms import (LeaveForm, OverTimeForm, RoleForm,
-                                  StaffDocumentForm, StaffProfileAdminForm)
+from small_small_hr.forms import (ApplyLeaveForm, LeaveForm, OverTimeForm,
+                                  RoleForm, StaffDocumentForm,
+                                  StaffProfileAdminForm)
 from small_small_hr.models import Leave, StaffProfile
 from small_small_hr.serializers import StaffProfileSerializer
 
@@ -153,7 +154,7 @@ class TestForms(TestCase):
             'reason': 'Need a break',
         }
 
-        form = LeaveForm(data=data)
+        form = ApplyLeaveForm(data=data)
         self.assertTrue(form.is_valid())
         leave = form.save()
         self.assertEqual(staffprofile, leave.staff)
@@ -165,6 +166,52 @@ class TestForms(TestCase):
         self.assertEqual('Need a break', leave.reason)
         self.assertEqual(Leave.PENDING, leave.status)
         self.assertEqual('', leave.comments)
+
+    def test_leaveform_admin(self):
+        """
+        Test LeaveForm apply for leave
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+        staffprofile.leave_days = 21
+        staffprofile.sick_days = 10
+        staffprofile.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        # 6 days of leave
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
+                   leave_type=Leave.REGULAR, carried_over_days=12)
+
+        data = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.REGULAR,
+            'start': start,
+            'end': end,
+            'reason': 'Need a break',
+            'status': Leave.APPROVED,
+            'comments': 'Okay'
+        }
+
+        form = LeaveForm(data=data)
+        self.assertTrue(form.is_valid())
+        leave = form.save()
+        self.assertEqual(staffprofile, leave.staff)
+        self.assertEqual(Leave.REGULAR, leave.leave_type)
+        self.assertEqual(start, leave.start)
+        self.assertEqual(end, leave.end)
+        self.assertEqual(
+            timedelta(days=5).days, (leave.end - leave.start).days)
+        self.assertEqual('Need a break', leave.reason)
+        self.assertEqual(Leave.APPROVED, leave.status)
+        self.assertEqual('Okay', leave.comments)
 
     def test_leaveform_process(self):
         """
