@@ -8,15 +8,14 @@ from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
-from django.utils import timezone
 
 import pytz
 from model_mommy import mommy
 
-from small_small_hr.forms import (ApplyLeaveForm, LeaveForm, OverTimeForm,
-                                  RoleForm, StaffDocumentForm,
+from small_small_hr.forms import (ApplyLeaveForm, ApplyOverTimeForm, LeaveForm,
+                                  OverTimeForm, RoleForm, StaffDocumentForm,
                                   StaffProfileAdminForm)
-from small_small_hr.models import Leave, StaffProfile
+from small_small_hr.models import Leave, OverTime, StaffProfile
 from small_small_hr.serializers import StaffProfileSerializer
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -52,7 +51,7 @@ class TestForms(TestCase):
         self.assertEqual('Accountant', role.name)
         self.assertEqual('Keep accounts', role.description)
 
-    def test_overtime_form(self):
+    def test_overtime_form_apply(self):
         """
         Test OverTimeForm
         """
@@ -77,6 +76,47 @@ class TestForms(TestCase):
             'reason': 'Extra work',
         }
 
+        form = ApplyOverTimeForm(data=data)
+        self.assertTrue(form.is_valid())
+        overtime = form.save()
+        self.assertEqual(staffprofile, overtime.staff)
+        self.assertEqual(start.date(), overtime.date)
+        self.assertEqual(start.time(), overtime.start)
+        self.assertEqual(end.time(), overtime.end)
+        self.assertEqual(
+            timedelta(seconds=3600 * 6).seconds,
+            overtime.get_duration().seconds)
+        self.assertEqual('Extra work', overtime.reason)
+        self.assertEqual(OverTime.PENDING, overtime.status)
+        self.assertEqual('', overtime.comments)
+
+    def test_overtime_form_process(self):
+        """
+        Test OverTimeForm
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = user.staffprofile
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        # 6 hours of overtime
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 5, 6, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        data = {
+            'staff': staffprofile.id,
+            'date': start.date(),
+            'start': start.time(),
+            'end': end.time(),
+            'reason': 'Extra work',
+            'status': OverTime.APPROVED,
+            'comments': 'Cool'
+        }
+
         form = OverTimeForm(data=data)
         self.assertTrue(form.is_valid())
         overtime = form.save()
@@ -88,8 +128,8 @@ class TestForms(TestCase):
             timedelta(seconds=3600 * 6).seconds,
             overtime.get_duration().seconds)
         self.assertEqual('Extra work', overtime.reason)
-        self.assertEqual(Leave.PENDING, overtime.status)
-        self.assertEqual('', overtime.comments)
+        self.assertEqual(OverTime.APPROVED, overtime.status)
+        self.assertEqual('Cool', overtime.comments)
 
     def test_overtime_form_start_end(self):
         """
@@ -290,7 +330,7 @@ class TestForms(TestCase):
             'reason': 'Need a break',
         }
 
-        form = LeaveForm(data=data)
+        form = ApplyLeaveForm(data=data)
         self.assertTrue(form.is_valid())
         leave = form.save()
         self.assertEqual(staffprofile, leave.staff)

@@ -103,6 +103,46 @@ class OverTimeForm(forms.ModelForm):
             self.add_error('end', _("end must be greater than start"))
 
 
+class ApplyOverTimeForm(OverTimeForm):
+    """
+    Form used when applying for overtime
+    """
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """
+        Class meta options
+        """
+        model = OverTime
+        fields = [
+            'staff',
+            'date',
+            'start',
+            'end',
+            'reason',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = True
+        self.helper.form_method = 'post'
+        self.helper.render_required_fields = True
+        self.helper.form_show_labels = True
+        self.helper.html5_required = True
+        self.helper.form_id = 'overtime-form'
+        self.helper.layout = Layout(
+            Field('staff',),
+            Field('date',),
+            Field('start',),
+            Field('end',),
+            Field('reason',),
+            FormActions(
+                Submit('submitBtn', _('Submit'), css_class='btn-primary'),
+            )
+        )
+
+
 class LeaveForm(forms.ModelForm):
     """
     Form used when managing Leave objects
