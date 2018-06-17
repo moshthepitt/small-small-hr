@@ -1,9 +1,13 @@
 """
 Forms module for small small hr
 """
+from datetime import datetime, time
+
 from django import forms
+from django.conf import settings
 from django.utils.translation import ugettext as _
 
+import pytz
 from crispy_forms.bootstrap import Field, FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
@@ -147,6 +151,8 @@ class LeaveForm(forms.ModelForm):
     """
     Form used when managing Leave objects
     """
+    start = forms.DateField(label=_('Start Date'), required=True)
+    end = forms.DateField(label=_('End Date'), required=True)
 
     class Meta:  # pylint: disable=too-few-public-methods
         """
@@ -185,6 +191,28 @@ class LeaveForm(forms.ModelForm):
                 Submit('submitBtn', _('Submit'), css_class='btn-primary'),
             )
         )
+
+    def clean_start(self):
+        """
+        clean start field
+        """
+        data = self.cleaned_data['start']
+        data = datetime.combine(
+            date=data,
+            time=time(0, 0, 0, 0),
+            tzinfo=pytz.timezone(settings.TIME_ZONE))
+        return data
+
+    def clean_end(self):
+        """
+        clean end field
+        """
+        data = self.cleaned_data['end']
+        data = datetime.combine(
+            date=data,
+            time=time(0, 0, 0, 0),
+            tzinfo=pytz.timezone(settings.TIME_ZONE))
+        return data
 
     def clean(self):
         """
