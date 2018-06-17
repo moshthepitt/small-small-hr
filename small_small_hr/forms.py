@@ -196,6 +196,12 @@ class LeaveForm(forms.ModelForm):
         end = cleaned_data.get('end')
         start = cleaned_data.get('start')
 
+        # end year and start year must be the same
+        if end.year != start.year:
+            msg = _('start and end must be from the same year')
+            self.add_error('start', msg)
+            self.add_error('end', msg)
+
         # end must be later than start
         if end <= start:
             self.add_error('end', _("end must be greater than start"))

@@ -391,7 +391,7 @@ class TestForms(TestCase):
 
     def test_leaveform_start_end(self):
         """
-        Test start < end
+        Test start and end
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
         staffprofile = user.staffprofile
@@ -426,6 +426,31 @@ class TestForms(TestCase):
         self.assertEqual(
             'end must be greater than start',
             form.errors['end'][0]
+        )
+
+        # end year and start year must be the same
+
+        end = datetime(
+            2018, 6, 1, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        data2 = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.SICK,
+            'start': start,
+            'end': end,
+            'reason': 'Need a break'
+        }
+
+        form2 = LeaveForm(data=data2)
+        self.assertFalse(form2.is_valid())
+        self.assertEqual(2, len(form2.errors.keys()))
+        self.assertEqual(
+            'start and end must be from the same year',
+            form2.errors['start'][0]
+        )
+        self.assertEqual(
+            'start and end must be from the same year',
+            form2.errors['end'][0]
         )
 
     def test_leaveform_max_days(self):
