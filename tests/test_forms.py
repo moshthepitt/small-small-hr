@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 
 import pytz
 from model_mommy import mommy
@@ -539,6 +539,7 @@ class TestForms(TestCase):
             form.errors['end'][0]
         )
 
+    @override_settings(PRIVATE_STORAGE_ROOT='/tmp/')
     def test_staffdocumentform(self):
         """
         Test StaffDocumentForm
@@ -553,31 +554,30 @@ class TestForms(TestCase):
         path = os.path.join(
             BASE_DIR, 'tests', 'fixtures', 'contract.pdf')
 
-        with self.settings(MEDIA_ROOT='/tmp', PRIVATE_STORAGE_ROOT='/tmp'):
-            with open(path, 'r+b') as contract_file:
-                data = {
-                    'staff': staffprofile.id,
-                    'name': 'Employment Contract',
-                    'description': 'This is the employment contract!',
-                    'file': contract_file
-                }
+        with open(path, 'r+b') as contract_file:
+            data = {
+                'staff': staffprofile.id,
+                'name': 'Employment Contract',
+                'description': 'This is the employment contract!',
+                'file': contract_file
+            }
 
-                file_dict = {
-                    'file': SimpleUploadedFile(
-                        name=contract_file.name,
-                        content=contract_file.read(),
-                        content_type='application/pdf'
-                    )}
+            file_dict = {
+                'file': SimpleUploadedFile(
+                    name=contract_file.name,
+                    content=contract_file.read(),
+                    content_type='application/pdf'
+                )}
 
-                form = StaffDocumentForm(data, file_dict)
+            form = StaffDocumentForm(data, file_dict)
 
-                self.assertTrue(form.is_valid())
-                doc = form.save()
+            self.assertTrue(form.is_valid())
+            doc = form.save()
 
-                self.assertEqual(staffprofile, doc.staff)
-                self.assertEqual('Employment Contract', doc.name)
-                self.assertEqual(
-                    'This is the employment contract!', doc.description)
+            self.assertEqual(staffprofile, doc.staff)
+            self.assertEqual('Employment Contract', doc.name)
+            self.assertEqual(
+                'This is the employment contract!', doc.description)
 
         with open(path, 'r+b') as contract_file:
             self.assertTrue(contract_file.read(), doc.file.read())
