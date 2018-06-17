@@ -1,11 +1,13 @@
 """
 Module to test small_small_hr models
 """
-from datetime import timedelta
+from datetime import datetime, timedelta
 
+from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
+import pytz
 from model_mommy import mommy
 
 from small_small_hr.models import Leave
@@ -15,6 +17,130 @@ class TestModels(TestCase):
     """
     Test class for Scam models
     """
+
+    def test_annualleave_str(self):
+        """
+        Test the __str__ method on AnnualLeave
+        """
+        user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
+        staff = user.staffprofile
+        self.assertEqual(
+            '2018: Mosh Pitt Regular Leave',
+            mommy.make(
+                'small_small_hr.AnnualLeave', staff=staff, year=2018,
+                leave_type=Leave.REGULAR).__str__()
+        )
+
+    def test_annualleave_get_leave_days_remaining(self):
+        """
+        Test get_leave_days_remaining
+        """
+        user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
+        staff = user.staffprofile
+        annual_leave = mommy.make(
+                'small_small_hr.AnnualLeave', staff=staff, year=2017,
+                leave_type=Leave.REGULAR)
+
+        # 12 days of leave
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 16, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        # add some approved leave days
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=end, leave_type=Leave.REGULAR,
+            status=Leave.APPROVED)
+
+        # get some rejected and pending leave days
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=end, leave_type=Leave.REGULAR,
+            status=Leave.REJECTED)
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=end, leave_type=Leave.REGULAR,
+            status=Leave.PENDING)
+
+        annual_leave.refresh_from_db()
+
+        # we should ave 21 - 12 leave days remaining
+        self.assertEqual(
+            21 - 12,
+            annual_leave.get_leave_days_remaining()
+        )
+
+    def test_annualleave_cumulative_leave_taken(self):
+        """
+        Test get_cumulative_leave_taken
+        """
+        user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
+        staff = user.staffprofile
+        annual_leave = mommy.make(
+                'small_small_hr.AnnualLeave', staff=staff, year=2017,
+                leave_type=Leave.REGULAR)
+
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 7, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        # add some approved leave days
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=end, leave_type=Leave.REGULAR,
+            status=Leave.APPROVED)
+
+        # get some rejected and pending leave days
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=end, leave_type=Leave.REGULAR,
+            status=Leave.REJECTED)
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=end, leave_type=Leave.REGULAR,
+            status=Leave.PENDING)
+
+        annual_leave.refresh_from_db()
+        self.assertEqual(
+            3,
+            annual_leave.get_cumulative_leave_taken().days
+        )
+
+        # add some approved leave days that fall between years
+        start = datetime(
+            2017, 12, 30, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 12, 31, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=end, leave_type=Leave.REGULAR,
+            status=Leave.APPROVED)
+
+        annual_leave.refresh_from_db()
+        # we should have 5 days in 2017
+        self.assertEqual(
+            5,
+            annual_leave.get_cumulative_leave_taken().days
+        )
+
+        start = datetime(
+            2018, 1, 1, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = start + timedelta(days=4)
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=end, leave_type=Leave.REGULAR,
+            status=Leave.APPROVED)
+
+        # we should have 4 days in 2018
+        annual_leave_2018 = mommy.make(
+                'small_small_hr.AnnualLeave', staff=staff, year=2018,
+                leave_type=Leave.REGULAR)
+        self.assertEqual(
+            5,
+            annual_leave_2018.get_cumulative_leave_taken().days
+        )
 
     def test_staffprofile_str(self):
         """

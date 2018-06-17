@@ -82,7 +82,7 @@ class StaffProfile(TimeStampedModel, models.Model):
     user = models.OneToOneField(
         USER, verbose_name=_('User'), on_delete=models.CASCADE)
     sex = models.CharField(_('Gender'), choices=SEX_CHOICES, max_length=1,
-                           default=NOT_KNOWN, blank=True)
+                           default=NOT_KNOWN, blank=True, db_index=True)
     role = models.ForeignKey(Role, verbose_name=_('Role'), blank=True,
                              default=None, null=True,
                              on_delete=models.SET_NULL)
@@ -223,7 +223,7 @@ class BaseStaffRequest(TimeStampedModel, models.Model):
     reason = models.TextField(_('Reason'), blank=True, default='')
     status = models.CharField(
         _('Status'), max_length=1, choices=STATUS_CHOICES, default=PENDING,
-        blank=True)
+        blank=True, db_index=True)
     comments = models.TextField(_('Comments'), blank=True, default='')
 
     class Meta(object):  # pylint: disable=too-few-public-methods
@@ -247,7 +247,7 @@ class Leave(BaseStaffRequest):
 
     leave_type = models.CharField(
         _('Type'), max_length=1, choices=TYPE_CHOICES, default=REGULAR,
-        blank=True)
+        blank=True, db_index=True)
 
     objects = LeaveManager()
 
@@ -270,7 +270,8 @@ class OverTime(BaseStaffRequest):
     """
     Overtime model class
     """
-    date = models.DateField(_('Date'), auto_now=False, auto_now_add=False)
+    date = models.DateField(
+        _('Date'), auto_now=False, auto_now_add=False, db_index=True)
     start = models.TimeField(_('Start'), auto_now=False, auto_now_add=False)
     end = models.TimeField(_('End'), auto_now=False, auto_now_add=False)
 
@@ -295,3 +296,74 @@ class OverTime(BaseStaffRequest):
         start = datetime.combine(self.date, self.start)
         end = datetime.combine(self.date, self.end)
         return end - start
+
+
+class AnnualLeave(TimeStampedModel, models.Model):
+    """
+    Model to keep track of staff employee annual leave
+
+    This model is meant to be populated once a year
+    Each staff member can only have one record per leave_type per year
+    """
+    YEAR_CHOICES = [
+        (r, r) for r in range(2017, datetime.today().year + 5)
+    ]
+
+    year = models.PositiveIntegerField(
+        _('Year'), choices=YEAR_CHOICES, default=datetime.today().year,
+        db_index=True)
+    staff = models.ForeignKey(
+        StaffProfile, verbose_name=_('Staff Member'), on_delete=models.CASCADE)
+    leave_type = models.CharField(
+        _('Type'), max_length=1, choices=Leave.TYPE_CHOICES, db_index=True)
+    allowed_days = models.PositiveIntegerField(
+        _('Allowed Leave days'), default=21, blank=True,
+        help_text=_('Number of leave days allowed in a year.'))
+    carried_over_days = models.PositiveIntegerField(
+        _('Carried Leave days'), default=0, blank=True,
+        help_text=_('Number of leave days carried over into this year.'))
+
+    class Meta(object):  # pylint: disable=too-few-public-methods
+        """
+        Meta options for AnnualLeave
+        """
+        verbose_name = _('Annual Leave')
+        verbose_name_plural = _('Annual Leave')
+        ordering = ['year', 'leave_type', 'staff']
+        unique_together = (('year', 'staff', 'leave_type'),)
+
+    def __str__(self):
+        return _(
+            f'{self.year}: {self.staff.get_name()} '
+            f'{self.get_leave_type_display()}')
+
+    def get_cumulative_leave_taken(self):
+        """
+        Get the cumulative leave taken
+
+        Returns a timedelta
+        """
+        # we add one day to make end and start inclusive
+        leave_queryset = Leave.objects.filter(
+            staff=self.staff,
+            status=Leave.APPROVED,
+            leave_type=self.leave_type,
+            start__year=self.year,
+            end__year=self.year).annotate(
+                duration=models.ExpressionWrapper(
+                    models.F('end') - models.F('start') + timedelta(days=1),
+                    output_field=models.DurationField()))
+
+        return leave_queryset.aggregate(
+            leave=Coalesce(Sum('duration'),
+                           V(timedelta(days=0))))['leave']
+
+    def get_leave_days_remaining(self):
+        """
+        Get the remaining leave days
+        """
+        taken = self.get_cumulative_leave_taken().days
+        allowed = self.allowed_days
+        starting_balance = self.carried_over_days
+
+        return allowed + starting_balance - taken
