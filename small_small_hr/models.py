@@ -18,6 +18,7 @@ from private_storage.fields import PrivateFileField
 from small_small_hr.managers import LeaveManager
 
 USER = settings.AUTH_USER_MODEL
+TWOPLACES = Decimal(10) ** -2
 
 
 class TimeStampedModel(models.Model):
@@ -159,12 +160,13 @@ class StaffProfile(TimeStampedModel, models.Model):
         Get available leave days
         """
         try:
+            # pylint: disable=no-member
             leave_record = AnnualLeave.objects.get(
                 leave_type=Leave.REGULAR,
                 staff=self,
                 year=year)
         except AnnualLeave.DoesNotExist:
-            return 0
+            return Decimal(0)
         else:
             return leave_record.get_available_leave_days()
 
@@ -173,12 +175,13 @@ class StaffProfile(TimeStampedModel, models.Model):
         Get available sick days
         """
         try:
+            # pylint: disable=no-member
             leave_record = AnnualLeave.objects.get(
                 leave_type=Leave.SICK,
                 staff=self,
                 year=year)
         except AnnualLeave.DoesNotExist:
-            return 0
+            return Decimal(0)
         else:
             return leave_record.get_available_leave_days()
 
@@ -351,6 +354,7 @@ class AnnualLeave(TimeStampedModel, models.Model):
         unique_together = (('year', 'staff', 'leave_type'),)
 
     def __str__(self):
+        # pylint: disable=no-member
         return _(
             f'{self.year}: {self.staff.get_name()} '
             f'{self.get_leave_type_display()}')
@@ -400,4 +404,4 @@ class AnnualLeave(TimeStampedModel, models.Model):
         # the starting balance
         starting_balance = self.carried_over_days
 
-        return earned + starting_balance - taken
+        return Decimal(earned + starting_balance - taken)

@@ -2,13 +2,15 @@
 Module to test small_small_hr models
 """
 import os
-from datetime import timedelta
+from datetime import datetime, timedelta
 
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
 from django.utils import timezone
 
+import pytz
 from model_mommy import mommy
 
 from small_small_hr.forms import (LeaveForm, OverTimeForm, RoleForm,
@@ -60,8 +62,11 @@ class TestForms(TestCase):
         request.session = {}
         request.user = AnonymousUser()
 
-        start = timezone.now()
-        end = start + timedelta(seconds=3600)
+        # 6 hours of overtime
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 5, 6, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
 
         data = {
             'staff': staffprofile.id,
@@ -79,7 +84,7 @@ class TestForms(TestCase):
         self.assertEqual(start.time(), overtime.start)
         self.assertEqual(end.time(), overtime.end)
         self.assertEqual(
-            timedelta(seconds=3600).seconds,
+            timedelta(seconds=3600 * 6).seconds,
             overtime.get_duration().seconds)
         self.assertEqual('Extra work', overtime.reason)
         self.assertEqual(Leave.PENDING, overtime.status)
@@ -96,8 +101,10 @@ class TestForms(TestCase):
         request.session = {}
         request.user = AnonymousUser()
 
-        start = timezone.now()
-        end = start - timedelta(seconds=3600)
+        start = datetime(
+            2017, 6, 5, 6, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 5, 5, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
 
         data = {
             'staff': staffprofile.id,
@@ -129,8 +136,14 @@ class TestForms(TestCase):
         request.session = {}
         request.user = AnonymousUser()
 
-        start = timezone.now()
-        end = start + timedelta(days=7)
+        # 6 days of leave
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
+                   leave_type=Leave.REGULAR, carried_over_days=12)
 
         data = {
             'staff': staffprofile.id,
@@ -148,7 +161,7 @@ class TestForms(TestCase):
         self.assertEqual(start, leave.start)
         self.assertEqual(end, leave.end)
         self.assertEqual(
-            timedelta(days=7).days, (leave.end - leave.start).days)
+            timedelta(days=5).days, (leave.end - leave.start).days)
         self.assertEqual('Need a break', leave.reason)
         self.assertEqual(Leave.PENDING, leave.status)
         self.assertEqual('', leave.comments)
@@ -167,8 +180,14 @@ class TestForms(TestCase):
         request.session = {}
         request.user = AnonymousUser()
 
-        start = timezone.now()
-        end = start + timedelta(days=7)
+        # 6 days of leave
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
+                   leave_type=Leave.REGULAR, carried_over_days=4)
 
         data = {
             'staff': staffprofile.id,
@@ -188,7 +207,7 @@ class TestForms(TestCase):
         self.assertEqual(start, leave.start)
         self.assertEqual(end, leave.end)
         self.assertEqual(
-            timedelta(days=7).days, (leave.end - leave.start).days)
+            timedelta(days=5).days, (leave.end - leave.start).days)
         self.assertEqual('Need a break', leave.reason)
         self.assertEqual(Leave.REJECTED, leave.status)
         self.assertEqual('Just no', leave.comments)
@@ -207,8 +226,14 @@ class TestForms(TestCase):
         request.session = {}
         request.user = AnonymousUser()
 
-        start = timezone.now()
-        end = start + timedelta(days=7)
+        # 6 days of leave
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
+                   leave_type=Leave.SICK, carried_over_days=4)
 
         data = {
             'staff': staffprofile.id,
@@ -226,7 +251,7 @@ class TestForms(TestCase):
         self.assertEqual(start, leave.start)
         self.assertEqual(end, leave.end)
         self.assertEqual(
-            timedelta(days=7).days, (leave.end - leave.start).days)
+            timedelta(days=5).days, (leave.end - leave.start).days)
         self.assertEqual('Need a break', leave.reason)
         self.assertEqual(Leave.PENDING, leave.status)
         self.assertEqual('', leave.comments)
@@ -245,8 +270,14 @@ class TestForms(TestCase):
         request.session = {}
         request.user = AnonymousUser()
 
-        start = timezone.now()
-        end = start + timedelta(days=7)
+        # 6 days of leave
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
+                   leave_type=Leave.SICK, carried_over_days=4)
 
         data = {
             'staff': staffprofile.id,
@@ -266,7 +297,7 @@ class TestForms(TestCase):
         self.assertEqual(start, leave.start)
         self.assertEqual(end, leave.end)
         self.assertEqual(
-            timedelta(days=7).days, (leave.end - leave.start).days)
+            timedelta(days=5).days, (leave.end - leave.start).days)
         self.assertEqual('Need a break', leave.reason)
         self.assertEqual(Leave.REJECTED, leave.status)
         self.assertEqual('Just no', leave.comments)
@@ -285,8 +316,14 @@ class TestForms(TestCase):
         request.session = {}
         request.user = AnonymousUser()
 
-        start = timezone.now()
-        end = start - timedelta(days=1)
+        # 6 days of leave
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 1, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
+                   leave_type=Leave.SICK, carried_over_days=4)
 
         data = {
             'staff': staffprofile.id,
@@ -318,8 +355,14 @@ class TestForms(TestCase):
         request.session = {}
         request.user = AnonymousUser()
 
-        start = timezone.now()
-        end = start + timedelta(days=32)
+        # 6 days of leave
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 7, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
+                   leave_type=Leave.REGULAR, allowed_days=21)
 
         data = {
             'staff': staffprofile.id,
@@ -333,11 +376,11 @@ class TestForms(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(2, len(form.errors.keys()))
         self.assertEqual(
-            'Not enough leave days. Available leave days are 21',
+            'Not enough leave days. Available leave days are 21.00',
             form.errors['start'][0]
         )
         self.assertEqual(
-            'Not enough leave days. Available leave days are 21',
+            'Not enough leave days. Available leave days are 21.00',
             form.errors['end'][0]
         )
 
@@ -355,8 +398,14 @@ class TestForms(TestCase):
         request.session = {}
         request.user = AnonymousUser()
 
-        start = timezone.now()
-        end = start + timedelta(days=12)
+        # 6 days of leave
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 20, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
+                   leave_type=Leave.SICK, carried_over_days=0, allowed_days=10)
 
         data = {
             'staff': staffprofile.id,
@@ -370,11 +419,11 @@ class TestForms(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(2, len(form.errors.keys()))
         self.assertEqual(
-            'Not enough sick days. Available sick days are 10',
+            'Not enough sick days. Available sick days are 10.00',
             form.errors['start'][0]
         )
         self.assertEqual(
-            'Not enough sick days. Available sick days are 10',
+            'Not enough sick days. Available sick days are 10.00',
             form.errors['end'][0]
         )
 

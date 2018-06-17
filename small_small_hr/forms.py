@@ -9,8 +9,8 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
 from phonenumber_field.formfields import PhoneNumberField
 
-from small_small_hr.models import (Leave, OverTime, Role, StaffDocument,
-                                   StaffProfile)
+from small_small_hr.models import (TWOPLACES, Leave, OverTime, Role,
+                                   StaffDocument, StaffProfile)
 
 
 class RoleForm(forms.ModelForm):
@@ -162,19 +162,19 @@ class LeaveForm(forms.ModelForm):
 
         # staff profile must have sufficient sick days
         if leave_type == Leave.SICK:
-            sick_days = staff.get_available_sick_days()
-            if (end - start) > sick_days:
+            sick_days = staff.get_available_sick_days(year=start.year)
+            if (end - start).days > sick_days:
                 msg = _('Not enough sick days. Available sick days '
-                        f'are {sick_days.days}')
+                        f'are {sick_days.quantize(TWOPLACES)}')
                 self.add_error('start', msg)
                 self.add_error('end', msg)
 
         # staff profile must have sufficient leave days
         if leave_type == Leave.REGULAR:
-            leave_days = staff.get_available_leave_days()
-            if (end - start) > leave_days:
+            leave_days = staff.get_available_leave_days(year=start.year)
+            if (end - start).days > leave_days:
                 msg = _('Not enough leave days. Available leave days '
-                        f'are {leave_days.days}')
+                        f'are {leave_days.quantize(TWOPLACES)}')
                 self.add_error('start', msg)
                 self.add_error('end', msg)
 
