@@ -14,7 +14,7 @@ from model_mommy import mommy
 
 from small_small_hr.forms import (ApplyLeaveForm, ApplyOverTimeForm, LeaveForm,
                                   OverTimeForm, RoleForm, StaffDocumentForm,
-                                  StaffProfileAdminForm)
+                                  StaffProfileAdminForm, StaffProfileUserForm)
 from small_small_hr.models import Leave, OverTime, StaffProfile
 from small_small_hr.serializers import StaffProfileSerializer
 
@@ -557,6 +557,59 @@ class TestForms(TestCase):
         with open(path, 'r+b') as contract_file:
             self.assertTrue(contract_file.read(), doc.file.read())
 
+    def test_staff_profile_user_form(self):
+        """
+        Test StaffProfileUserForm
+        """
+        user = mommy.make('auth.User')
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        data = {
+            'first_name': 'Bob',
+            'last_name': 'Mbugua',
+            'id_number': '123456789',
+            'sex': StaffProfile.MALE,
+            'nhif': '111111',
+            'nssf': '222222',
+            'pin_number': 'A0000000Y',
+            'emergency_contact_name': 'Bob Father',
+            'emergency_contact_number': '+254722111111',
+            'phone': '+254722111111',
+            'address': 'This is the address.',
+            'birthday': '1996-01-27'
+        }
+
+        form = StaffProfileUserForm(data=data, instance=user.staffprofile,
+                                    request=request)
+        self.assertTrue(form.is_valid())
+        form.save()
+
+        user.refresh_from_db()
+        staffprofile = user.staffprofile
+
+        self.assertEqual('Bob Mbugua', user.staffprofile.get_name())
+        self.assertEqual(StaffProfile.MALE, staffprofile.sex)
+        self.assertEqual('+254722111111', staffprofile.phone.as_e164)
+
+        self.assertEqual('This is the address.', staffprofile.address)
+        self.assertEqual('1996-01-27', str(staffprofile.birthday))
+
+        self.assertEqual('123456789',
+                         staffprofile.data['id_number'])
+        self.assertEqual('111111',
+                         staffprofile.data['nhif'])
+        self.assertEqual('222222',
+                         staffprofile.data['nssf'])
+        self.assertEqual('A0000000Y',
+                         staffprofile.data['pin_number'])
+        self.assertEqual('Bob Father',
+                         staffprofile.data['emergency_contact_name'])
+        self.assertEqual('+254722111111',
+                         staffprofile.data['emergency_contact_number'])
+
     def test_staff_profile_admin_form(self):
         """
         Test StaffProfileAdminForm
@@ -601,7 +654,6 @@ class TestForms(TestCase):
         self.assertEqual(21, staffprofile.leave_days)
         self.assertEqual(9, staffprofile.sick_days)
         self.assertEqual(True, staffprofile.overtime_allowed)
-        self.assertEqual(9, staffprofile.sick_days)
 
         self.assertEqual('This is the address.', staffprofile.address)
         self.assertEqual('1996-01-27', str(staffprofile.birthday))
