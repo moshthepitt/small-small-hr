@@ -31,9 +31,9 @@ class TestModels(TestCase):
                 leave_type=Leave.REGULAR).__str__()
         )
 
-    def test_annualleave_get_leave_days_remaining(self):
+    def test_annualleave_get_available_leave_days(self):
         """
-        Test get_leave_days_remaining
+        Test get_available_leave_days
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
         staff = user.staffprofile
@@ -68,7 +68,7 @@ class TestModels(TestCase):
         # we should ave 21 - 12 leave days remaining
         self.assertEqual(
             21 - 12,
-            annual_leave.get_leave_days_remaining()
+            annual_leave.get_available_leave_days()
         )
 
     def test_annualleave_cumulative_leave_taken(self):
@@ -142,6 +142,24 @@ class TestModels(TestCase):
             annual_leave_2018.get_cumulative_leave_taken().days
         )
 
+    def test_available_leave_days(self):
+        """
+        Test available leave days at various times of the year
+        """
+        user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
+        staff = user.staffprofile
+        annual_leave = mommy.make(
+                'small_small_hr.AnnualLeave', staff=staff, year=2017,
+                leave_type=Leave.REGULAR, allowed_days=21, carried_over_days=0)
+
+        months = range(1, 13)
+
+        for month in months:
+            self.assertEqual(
+                month * 1.75,
+                annual_leave.get_available_leave_days(month=month)
+            )
+
     def test_staffprofile_str(self):
         """
         Test that the __str__ method on StaffProfile works
@@ -156,16 +174,20 @@ class TestModels(TestCase):
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
         staff = user.staffprofile
+        start = datetime(
+            2018, 1, 1, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
         mommy.make(
-            'small_small_hr.Leave', staff=staff, start=timezone.now(),
-            end=timezone.now() + timedelta(days=6), leave_type=Leave.REGULAR,
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=start + timedelta(days=6), leave_type=Leave.REGULAR,
             status=Leave.APPROVED)
         mommy.make(
-            'small_small_hr.Leave', staff=staff, start=timezone.now(),
-            end=timezone.now() + timedelta(days=5), leave_type=Leave.REGULAR,
+            'small_small_hr.Leave', staff=staff,
+            start=start + timedelta(days=10),
+            end=start + timedelta(days=14), leave_type=Leave.REGULAR,
             status=Leave.APPROVED)
-        self.assertEqual(timedelta(days=11).days,
-                         staff.get_approved_leave_days().days)
+        self.assertEqual(timedelta(days=10).days,
+                         staff.get_approved_leave_days(year=start.year).days)
 
     def test_get_approved_sick_days(self):
         """
@@ -173,16 +195,74 @@ class TestModels(TestCase):
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
         staff = user.staffprofile
+        start = datetime(
+            2018, 1, 1, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
         mommy.make(
-            'small_small_hr.Leave', staff=staff, start=timezone.now(),
-            end=timezone.now() + timedelta(days=4), leave_type=Leave.SICK,
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=start + timedelta(days=4), leave_type=Leave.SICK,
             status=Leave.APPROVED)
         mommy.make(
-            'small_small_hr.Leave', staff=staff, start=timezone.now(),
-            end=timezone.now() + timedelta(days=3), leave_type=Leave.SICK,
+            'small_small_hr.Leave', staff=staff,
+            start=start + timedelta(days=10),
+            end=start + timedelta(days=15),
+            leave_type=Leave.SICK, status=Leave.APPROVED)
+        self.assertEqual(timedelta(days=9).days,
+                         staff.get_approved_sick_days(year=start.year).days)
+
+    def test_staffprofile_get_available_leave_days(self):
+        """
+        Test StaffProfile get_available_leave_days
+        """
+        user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
+        staff = user.staffprofile
+        mommy.make('small_small_hr.AnnualLeave', staff=staff, year=2017,
+                   leave_type=Leave.REGULAR, allowed_days=21)
+
+        # 12 days of leave
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 16, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        # add some approved leave days
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=end, leave_type=Leave.REGULAR,
             status=Leave.APPROVED)
-        self.assertEqual(timedelta(days=7).days,
-                         staff.get_approved_sick_days().days)
+
+        staff.refresh_from_db()
+
+        # remaining should be 21 - 12
+        self.assertEqual(21 - 12, staff.get_available_leave_days(year=2017))
+
+    def test_staffprofile_get_available_sick_days(self):
+        """
+        Test StaffProfile get_available_leave_days
+        """
+        user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
+        staff = user.staffprofile
+        mommy.make('small_small_hr.AnnualLeave', staff=staff, year=2017,
+                   leave_type=Leave.SICK, allowed_days=10)
+
+        # 6 days of leave
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        # add some approved leave days
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=end, leave_type=Leave.SICK,
+            status=Leave.APPROVED)
+
+        staff.refresh_from_db()
+
+        # remaining should be 10 - 6
+        self.assertEqual(
+            10 - 6,
+            int(staff.get_available_sick_days(year=2017)))
 
     def test_role_str(self):
         """

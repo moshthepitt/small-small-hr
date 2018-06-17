@@ -1,7 +1,8 @@
 """
 Models module for small_small_hr
 """
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
@@ -123,45 +124,63 @@ class StaffProfile(TimeStampedModel, models.Model):
         # pylint: disable=no-member
         return f'{self.user.first_name} {self.user.last_name}'
 
-    def get_approved_leave_days(self):
+    def get_approved_leave_days(self, year: int = datetime.today().year):
         """
-        Get approved leave days
+        Get approved leave days in the current year
         """
         # pylint: disable=no-member
         queryset = self.leave_set.filter(
             status=Leave.APPROVED,
-            leave_type=Leave.REGULAR).annotate(
+            leave_type=Leave.REGULAR,
+            start__year=year,
+            end__year=year).annotate(
                 duration=models.F('end')-models.F('start'))
         return queryset.aggregate(
             leave=Coalesce(Sum('duration'),
                            V(timedelta(days=0))))['leave']
 
-    def get_approved_sick_days(self):
+    def get_approved_sick_days(self, year: int = datetime.today().year):
         """
-        Get approved leave days
+        Get approved leave days in the current year
         """
         # pylint: disable=no-member
         queryset = self.leave_set.filter(
             status=Leave.APPROVED,
-            leave_type=Leave.SICK).annotate(
+            leave_type=Leave.SICK,
+            start__year=year,
+            end__year=year).annotate(
                 duration=models.F('end')-models.F('start'))
         return queryset.aggregate(
             leave=Coalesce(Sum('duration'),
                            V(timedelta(days=0))))['leave']
 
-    def get_available_leave_days(self):
+    def get_available_leave_days(self, year: int = datetime.today().year):
         """
         Get available leave days
         """
-        return timedelta(days=self.leave_days) -\
-            self.get_approved_leave_days()
+        try:
+            leave_record = AnnualLeave.objects.get(
+                leave_type=Leave.REGULAR,
+                staff=self,
+                year=year)
+        except AnnualLeave.DoesNotExist:
+            return 0
+        else:
+            return leave_record.get_available_leave_days()
 
-    def get_available_sick_days(self):
+    def get_available_sick_days(self, year: int = datetime.today().year):
         """
         Get available sick days
         """
-        return timedelta(days=self.sick_days) -\
-            self.get_approved_sick_days()
+        try:
+            leave_record = AnnualLeave.objects.get(
+                leave_type=Leave.SICK,
+                staff=self,
+                year=year)
+        except AnnualLeave.DoesNotExist:
+            return 0
+        else:
+            return leave_record.get_available_leave_days()
 
     def __str__(self):
         return self.get_name()
@@ -259,7 +278,6 @@ class Leave(BaseStaffRequest):
         verbose_name = _('Leave')
         verbose_name_plural = _('Leave')
         ordering = ['staff', 'start']
-        # base_manager_name = self.objects
 
     def __str__(self):
         # pylint: disable=no-member
@@ -358,12 +376,28 @@ class AnnualLeave(TimeStampedModel, models.Model):
             leave=Coalesce(Sum('duration'),
                            V(timedelta(days=0))))['leave']
 
-    def get_leave_days_remaining(self):
+    def get_available_leave_days(self, month: int = 12):
         """
         Get the remaining leave days
         """
-        taken = self.get_cumulative_leave_taken().days
+        if month <= 0:
+            month = 1
+        elif month > 12:
+            month = 12
+
+        # the max allowed days per year
         allowed = self.allowed_days
+
+        # the days `earned` per month
+        per_month = Decimal(allowed / 12)
+
+        # the days earned so far, given the month
+        earned = Decimal(month) * per_month
+
+        # the days taken
+        taken = self.get_cumulative_leave_taken().days
+
+        # the starting balance
         starting_balance = self.carried_over_days
 
-        return allowed + starting_balance - taken
+        return earned + starting_balance - taken
