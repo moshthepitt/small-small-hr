@@ -12,7 +12,7 @@ from small_small_hr.signals import create_staffprofile
 
 class TestSignals(TestCase):
     """
-    Test class for Scam models
+    Test class for signals
     """
 
     def setUp(self):

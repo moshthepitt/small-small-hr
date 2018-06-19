@@ -341,7 +341,7 @@ class AnnualLeave(TimeStampedModel, models.Model):
         _('Allowed Leave days'), default=21, blank=True,
         help_text=_('Number of leave days allowed in a year.'))
     carried_over_days = models.PositiveIntegerField(
-        _('Carried Leave days'), default=0, blank=True,
+        _('Carried Over Leave days'), default=0, blank=True,
         help_text=_('Number of leave days carried over into this year.'))
 
     class Meta(object):  # pylint: disable=too-few-public-methods
