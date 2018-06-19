@@ -5,6 +5,7 @@ from datetime import datetime, time
 
 from django import forms
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
 import pytz
@@ -482,6 +483,78 @@ class StaffProfileAdminForm(forms.ModelForm):
         user.last_name = self.cleaned_data['last_name']
         user.save()
         return staffprofile
+
+
+class StaffProfileAdminCreateForm(StaffProfileAdminForm):
+    """
+    Form used when creating new Staff Profiles
+    """
+    user = forms.ModelChoiceField(
+        label=_('User'), queryset=User.objects.filter(staffprofile=None))
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """
+        Class meta options
+        """
+        model = StaffProfile
+        fields = [
+            'user',
+            'first_name',
+            'last_name',
+            'id_number',
+            'phone',
+            'sex',
+            'role',
+            'nhif',
+            'nssf',
+            'pin_number',
+            'address',
+            'birthday',
+            'leave_days',
+            'sick_days',
+            'overtime_allowed',
+            'start_date',
+            'end_date',
+            'emergency_contact_name',
+            'emergency_contact_number',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = True
+        self.helper.form_method = 'post'
+        self.helper.render_required_fields = True
+        self.helper.form_show_labels = True
+        self.helper.html5_required = True
+        self.helper.form_id = 'staffprofile-form'
+        self.helper.layout = Layout(
+            Field('user',),
+            Field('first_name',),
+            Field('last_name',),
+            Field('phone',),
+            Field('id_number',),
+            Field('sex',),
+            Field('role',),
+            Field('nhif',),
+            Field('nssf',),
+            Field('pin_number',),
+            Field('emergency_contact_name',),
+            Field('emergency_contact_number',),
+            Field('address',),
+            Field('birthday',),
+            Field('leave_days',),
+            Field('sick_days',),
+            Field('overtime_allowed',),
+            Field('start_date',),
+            Field('end_date',),
+            Field('emergency_contact_name',),
+            Field('emergency_contact_number',),
+            FormActions(
+                Submit('submitBtn', _('Submit'), css_class='btn-primary'),
+            )
+        )
 
 
 class StaffProfileUserForm(StaffProfileAdminForm):
