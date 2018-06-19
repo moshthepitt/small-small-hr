@@ -16,7 +16,47 @@ from crispy_forms.layout import Layout, Submit
 from phonenumber_field.formfields import PhoneNumberField
 
 from small_small_hr.models import (TWOPLACES, Leave, OverTime, Role,
-                                   StaffDocument, StaffProfile)
+                                   StaffDocument, StaffProfile, AnnualLeave)
+
+
+class AnnualLeaveForm(forms.ModelForm):
+    """
+    Form used when managing AnnualLeave
+    """
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """
+        Class meta options
+        """
+        model = AnnualLeave
+        fields = [
+            'staff',
+            'year',
+            'leave_type',
+            'allowed_days',
+            'carried_over_days'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = True
+        self.helper.form_method = 'post'
+        self.helper.render_required_fields = True
+        self.helper.form_show_labels = True
+        self.helper.html5_required = True
+        self.helper.form_id = 'annual-leave-form'
+        self.helper.layout = Layout(
+            Field('staff',),
+            Field('year',),
+            Field('leave_type',),
+            Field('allowed_days',),
+            Field('carried_over_days'),
+            FormActions(
+                Submit('submitBtn', _('Submit'), css_class='btn-primary'),
+            )
+        )
 
 
 class RoleForm(forms.ModelForm):
