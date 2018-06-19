@@ -91,6 +91,51 @@ class TestForms(TestCase):
         self.assertEqual(OverTime.PENDING, overtime.status)
         self.assertEqual('', overtime.comments)
 
+    def test_overtime_form_apply_no_overlap(self):
+        """
+        Test no overlaps on OverTime
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        # 6 hours of overtime
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 5, 6, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        mommy.make(
+            'small_small_hr.OverTime', start=start.time(), end=end.time(),
+            status=OverTime.APPROVED, date=start.date, staff=staffprofile)
+
+        data = {
+            'staff': staffprofile.id,
+            'date': start.date(),
+            'start': start.time(),
+            'end': end.time(),
+            'reason': 'Extra work',
+        }
+
+        form = ApplyOverTimeForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(3, len(form.errors.keys()))
+        self.assertEqual(
+            'you cannot have overlapping overtime hours on the same day',
+            form.errors['start'][0]
+        )
+        self.assertEqual(
+            'you cannot have overlapping overtime hours on the same day',
+            form.errors['date'][0]
+        )
+        self.assertEqual(
+            'you cannot have overlapping overtime hours on the same day',
+            form.errors['end'][0]
+        )
+
     def test_overtime_form_process(self):
         """
         Test OverTimeForm
@@ -207,6 +252,53 @@ class TestForms(TestCase):
         self.assertEqual('Need a break', leave.reason)
         self.assertEqual(Leave.PENDING, leave.status)
         self.assertEqual('', leave.comments)
+
+    def test_leaveform_no_overlap(self):
+        """
+        Test LeaveForm no overlap
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
+        staffprofile.leave_days = 21
+        staffprofile.sick_days = 10
+        staffprofile.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        # 6 days of leave
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
+                   leave_type=Leave.REGULAR, carried_over_days=12)
+
+        mommy.make('small_small_hr.Leave', leave_type=Leave.REGULAR,
+                   start=start, end=end, status=Leave.APPROVED,
+                   staff=staffprofile)
+
+        data = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.REGULAR,
+            'start': start,
+            'end': end,
+            'reason': 'Need a break',
+        }
+
+        form = ApplyLeaveForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(2, len(form.errors.keys()))
+        self.assertEqual(
+            'you cannot have overlapping leave days',
+            form.errors['start'][0]
+        )
+        self.assertEqual(
+            'you cannot have overlapping leave days',
+            form.errors['end'][0]
+        )
 
     def test_leaveform_admin(self):
         """
