@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='small-small-hr',
-    version='0.0.1',
+    version='0.0.2',
     description='Minimal human resource management app for Django',
     license='MIT',
     author='Kelvin Jayanoris',
@@ -13,7 +13,7 @@ setup(
     url='https://github.com/moshthepitt/small-small-hr',
     packages=find_packages(exclude=['docs', 'tests']),
     install_requires=[
-        'Django >= 2',
+        'Django >= 1.11',
         'voluptuous',
         'psycopg2-binary',
         'sorl-thumbnail',
@@ -24,8 +24,6 @@ setup(
     ],
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.6',
-        'Framework :: Django',
-        'Framework :: Django :: 2',
+        'Programming Language :: Python :: 3.6'
     ],
 )
