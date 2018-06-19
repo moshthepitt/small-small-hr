@@ -14,6 +14,7 @@ from model_mommy import mommy
 
 from small_small_hr.forms import (ApplyLeaveForm, ApplyOverTimeForm, LeaveForm,
                                   OverTimeForm, RoleForm, StaffDocumentForm,
+                                  StaffProfileAdminCreateForm,
                                   StaffProfileAdminForm, StaffProfileUserForm)
 from small_small_hr.models import Leave, OverTime, StaffProfile
 from small_small_hr.serializers import StaffProfileSerializer
@@ -56,7 +57,7 @@ class TestForms(TestCase):
         Test OverTimeForm
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
 
         request = self.factory.get('/')
         request.session = {}
@@ -95,7 +96,7 @@ class TestForms(TestCase):
         Test OverTimeForm
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
 
         request = self.factory.get('/')
         request.session = {}
@@ -136,7 +137,7 @@ class TestForms(TestCase):
         Test OverTimeForm start end fields
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
 
         request = self.factory.get('/')
         request.session = {}
@@ -168,7 +169,7 @@ class TestForms(TestCase):
         Test LeaveForm apply for leave
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
         staffprofile.leave_days = 21
         staffprofile.sick_days = 10
         staffprofile.save()
@@ -212,7 +213,7 @@ class TestForms(TestCase):
         Test LeaveForm apply for leave
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
         staffprofile.leave_days = 21
         staffprofile.sick_days = 10
         staffprofile.save()
@@ -258,7 +259,7 @@ class TestForms(TestCase):
         Test LeaveForm process
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
         staffprofile.leave_days = 21
         staffprofile.sick_days = 10
         staffprofile.save()
@@ -304,7 +305,7 @@ class TestForms(TestCase):
         Test LeaveForm apply for sick leave
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
         staffprofile.leave_days = 21
         staffprofile.sick_days = 10
         staffprofile.save()
@@ -348,7 +349,7 @@ class TestForms(TestCase):
         Test LeaveForm process sick leave
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
         staffprofile.leave_days = 21
         staffprofile.sick_days = 10
         staffprofile.save()
@@ -394,7 +395,7 @@ class TestForms(TestCase):
         Test start and end
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
         staffprofile.leave_days = 21
         staffprofile.sick_days = 10
         staffprofile.save()
@@ -458,7 +459,7 @@ class TestForms(TestCase):
         Test leave days sufficient
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
         staffprofile.leave_days = 21
         staffprofile.sick_days = 10
         staffprofile.save()
@@ -501,7 +502,7 @@ class TestForms(TestCase):
         Test sick days sufficient
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
         staffprofile.leave_days = 21
         staffprofile.sick_days = 10
         staffprofile.save()
@@ -545,7 +546,7 @@ class TestForms(TestCase):
         Test StaffDocumentForm
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
 
         request = self.factory.get('/')
         request.session = {}
@@ -587,6 +588,7 @@ class TestForms(TestCase):
         Test StaffProfileUserForm
         """
         user = mommy.make('auth.User')
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
 
         request = self.factory.get('/')
         request.session = {}
@@ -607,13 +609,12 @@ class TestForms(TestCase):
             'birthday': '1996-01-27'
         }
 
-        form = StaffProfileUserForm(data=data, instance=user.staffprofile,
+        form = StaffProfileUserForm(data=data, instance=staffprofile,
                                     request=request)
         self.assertTrue(form.is_valid())
         form.save()
 
         user.refresh_from_db()
-        staffprofile = user.staffprofile
 
         self.assertEqual('Bob Mbugua', user.staffprofile.get_name())
         self.assertEqual(StaffProfile.MALE, staffprofile.sex)
@@ -635,9 +636,9 @@ class TestForms(TestCase):
         self.assertEqual('+254722111111',
                          staffprofile.data['emergency_contact_number'])
 
-    def test_staff_profile_admin_form(self):
+    def test_staff_profile_admin_create_form(self):
         """
-        Test StaffProfileAdminForm
+        Test StaffProfileAdminCreateForm
         """
         user = mommy.make('auth.User')
 
@@ -646,6 +647,7 @@ class TestForms(TestCase):
         request.user = AnonymousUser()
 
         data = {
+            'user': user.id,
             'first_name': 'Bob',
             'last_name': 'Mbugua',
             'id_number': '123456789',
@@ -665,13 +667,75 @@ class TestForms(TestCase):
             'end_date': '2018-12-31',
         }
 
-        form = StaffProfileAdminForm(data=data, instance=user.staffprofile,
+        form = StaffProfileAdminCreateForm(data=data, request=request)
+        self.assertTrue(form.is_valid())
+        staffprofile = form.save()
+
+        user.refresh_from_db()
+
+        self.assertEqual('Bob Mbugua', user.staffprofile.get_name())
+        self.assertEqual(StaffProfile.MALE, staffprofile.sex)
+        self.assertEqual('+254722111111', staffprofile.phone.as_e164)
+        self.assertEqual(21, staffprofile.leave_days)
+        self.assertEqual(9, staffprofile.sick_days)
+        self.assertEqual(True, staffprofile.overtime_allowed)
+
+        self.assertEqual('This is the address.', staffprofile.address)
+        self.assertEqual('1996-01-27', str(staffprofile.birthday))
+        self.assertEqual('2017-09-25', str(staffprofile.start_date))
+        self.assertEqual('2018-12-31', str(staffprofile.end_date))
+
+        self.assertEqual('123456789',
+                         staffprofile.data['id_number'])
+        self.assertEqual('111111',
+                         staffprofile.data['nhif'])
+        self.assertEqual('222222',
+                         staffprofile.data['nssf'])
+        self.assertEqual('A0000000Y',
+                         staffprofile.data['pin_number'])
+        self.assertEqual('Bob Father',
+                         staffprofile.data['emergency_contact_name'])
+        self.assertEqual('+254722111111',
+                         staffprofile.data['emergency_contact_number'])
+
+    def test_staff_profile_admin_form(self):
+        """
+        Test StaffProfileAdminForm
+        """
+        user = mommy.make('auth.User')
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        data = {
+            'user': user.id,
+            'first_name': 'Bob',
+            'last_name': 'Mbugua',
+            'id_number': '123456789',
+            'sex': StaffProfile.MALE,
+            'nhif': '111111',
+            'nssf': '222222',
+            'pin_number': 'A0000000Y',
+            'emergency_contact_name': 'Bob Father',
+            'emergency_contact_number': '+254722111111',
+            'phone': '+254722111111',
+            'address': 'This is the address.',
+            'birthday': '1996-01-27',
+            'leave_days': 21,
+            'sick_days': 9,
+            'overtime_allowed': True,
+            'start_date': '2017-09-25',
+            'end_date': '2018-12-31',
+        }
+
+        form = StaffProfileAdminForm(data=data, instance=staffprofile,
                                      request=request)
         self.assertTrue(form.is_valid())
         form.save()
 
         user.refresh_from_db()
-        staffprofile = user.staffprofile
 
         self.assertEqual('Bob Mbugua', user.staffprofile.get_name())
         self.assertEqual(StaffProfile.MALE, staffprofile.sex)
@@ -703,13 +767,13 @@ class TestForms(TestCase):
         Test unique pin_number
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
         staffprofile.data['id_number'] = '123456789'
         staffprofile.data['pin_number'] = '123456789'
         staffprofile.save()
 
         user2 = mommy.make('auth.User', first_name='Kyle', last_name='Ndoe')
-        staffprofile2 = user2.staffprofile
+        staffprofile2 = mommy.make('small_small_hr.StaffProfile', user=user2)
         staffprofile2.data['id_number'] = '9999999'
         staffprofile2.save()
 
@@ -735,12 +799,12 @@ class TestForms(TestCase):
         Test unique id_number
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
         staffprofile.data['id_number'] = '123456789'
         staffprofile.save()
 
         user2 = mommy.make('auth.User', first_name='Kyle', last_name='Ndoe')
-        staffprofile2 = user2.staffprofile
+        staffprofile2 = mommy.make('small_small_hr.StaffProfile', user=user2)
         staffprofile2.save()
 
         request = self.factory.get('/')
@@ -765,13 +829,13 @@ class TestForms(TestCase):
         Test unique NSSF
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
         staffprofile.data['id_number'] = '123456789'
         staffprofile.data['nssf'] = '123456789'
         staffprofile.save()
 
         user2 = mommy.make('auth.User', first_name='Kyle', last_name='Ndoe')
-        staffprofile2 = user2.staffprofile
+        staffprofile2 = mommy.make('small_small_hr.StaffProfile', user=user2)
         staffprofile2.data['id_number'] = '9999999'
         staffprofile2.save()
 
@@ -797,13 +861,13 @@ class TestForms(TestCase):
         Test unique NHIF
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
         staffprofile.data['id_number'] = '123456789'
         staffprofile.data['nhif'] = '123456789'
         staffprofile.save()
 
         user2 = mommy.make('auth.User', first_name='Kyle', last_name='Ndoe')
-        staffprofile2 = user2.staffprofile
+        staffprofile2 = mommy.make('small_small_hr.StaffProfile', user=user2)
         staffprofile2.data['id_number'] = '9999999'
         staffprofile2.save()
 
