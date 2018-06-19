@@ -9,7 +9,7 @@ from django.test import TestCase
 import pytz
 from model_mommy import mommy
 
-from small_small_hr.models import Leave
+from small_small_hr.models import Leave, StaffProfile
 from small_small_hr.utils import create_annual_leave, get_carry_over
 
 
@@ -22,7 +22,8 @@ class TestUtils(TestCase):
         """
         Test get_carry_over
         """
-        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        user = mommy.make('auth.User', id=23)
+        StaffProfile.objects.all().delete()
         staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
 
         self.assertEqual(
@@ -66,7 +67,8 @@ class TestUtils(TestCase):
         """
         Test create_annual_leave
         """
-        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        user = mommy.make('auth.User', id=56)
+        StaffProfile.objects.all().delete()
         staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
 
         obj = create_annual_leave(staffprofile, 2016, Leave.REGULAR)
