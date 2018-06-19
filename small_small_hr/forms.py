@@ -4,6 +4,7 @@ Forms module for small small hr
 from datetime import datetime, time
 
 from django import forms
+from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
@@ -102,10 +103,28 @@ class OverTimeForm(forms.ModelForm):
         cleaned_data = super().clean()
         end = cleaned_data.get('end')
         start = cleaned_data.get('start')
+        date = cleaned_data.get('date')
+        staff = cleaned_data.get('staff')
 
         # end must be later than start
         if end <= start:
             self.add_error('end', _("end must be greater than start"))
+
+        # must not overlap within the same date
+        # pylint: disable=no-member
+        overlap_qs = OverTime.objects.filter(
+            date=date, staff=staff, status=OverTime.APPROVED).filter(
+                Q(start__gte=start) | Q(end__lte=end))
+
+        if self.instance is not None:
+            overlap_qs = overlap_qs.exclude(id=self.instance.id)
+
+        if overlap_qs.exists():
+            msg = _('you cannot have overlapping overtime hours on the '
+                    'same day')
+            self.add_error('start', msg)
+            self.add_error('end', msg)
+            self.add_error('date', msg)
 
 
 class ApplyOverTimeForm(OverTimeForm):
@@ -252,6 +271,20 @@ class LeaveForm(forms.ModelForm):
                         f'are {leave_days.quantize(TWOPLACES)}')
                 self.add_error('start', msg)
                 self.add_error('end', msg)
+
+        # must not overlap
+        # pylint: disable=no-member
+        overlap_qs = Leave.objects.filter(
+            staff=staff, status=Leave.APPROVED, leave_type=leave_type).filter(
+                Q(start__gte=start) | Q(end__lte=end))
+
+        if self.instance is not None:
+            overlap_qs = overlap_qs.exclude(id=self.instance.id)
+
+        if overlap_qs.exists():
+            msg = _('you cannot have overlapping leave days')
+            self.add_error('start', msg)
+            self.add_error('end', msg)
 
 
 class ApplyLeaveForm(LeaveForm):
