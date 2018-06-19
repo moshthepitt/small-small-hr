@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 class TestForms(TestCase):
     """
-    Test class for Scam models
+    Test class for forms
     """
 
     def setUp(self):

@@ -15,7 +15,7 @@ from small_small_hr.models import Leave
 
 class TestModels(TestCase):
     """
-    Test class for Scam models
+    Test class for models
     """
 
     def test_annualleave_str(self):

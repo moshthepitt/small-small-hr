@@ -10,7 +10,7 @@ from small_small_hr.serializers import StaffProfileSerializer
 
 class TestSerializers(TestCase):
     """
-    Test class for Scam models
+    Test class for serializers
     """
 
     def test_staffprofileserializer_fields(self):
