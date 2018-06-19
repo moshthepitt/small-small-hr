@@ -18,7 +18,7 @@ class TestSerializers(TestCase):
         Test StaffProfileSerializer fields
         """
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
-        staffprofile = user.staffprofile
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
 
         serializer_instance = StaffProfileSerializer(staffprofile)
         expected_fields = [

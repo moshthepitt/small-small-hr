@@ -23,7 +23,7 @@ class TestModels(TestCase):
         Test the __str__ method on AnnualLeave
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = user.staffprofile
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
         self.assertEqual(
             '2018: Mosh Pitt Regular Leave',
             mommy.make(
@@ -36,7 +36,7 @@ class TestModels(TestCase):
         Test get_available_leave_days
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = user.staffprofile
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
         annual_leave = mommy.make(
                 'small_small_hr.AnnualLeave', staff=staff, year=2017,
                 leave_type=Leave.REGULAR)
@@ -76,7 +76,7 @@ class TestModels(TestCase):
         Test get_cumulative_leave_taken
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = user.staffprofile
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
         annual_leave = mommy.make(
                 'small_small_hr.AnnualLeave', staff=staff, year=2017,
                 leave_type=Leave.REGULAR)
@@ -147,7 +147,7 @@ class TestModels(TestCase):
         Test available leave days at various times of the year
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = user.staffprofile
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
         annual_leave = mommy.make(
                 'small_small_hr.AnnualLeave', staff=staff, year=2017,
                 leave_type=Leave.REGULAR, allowed_days=21, carried_over_days=0)
@@ -165,7 +165,7 @@ class TestModels(TestCase):
         Test that the __str__ method on StaffProfile works
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = user.staffprofile
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
         self.assertEqual('Mosh Pitt', staff.__str__())
 
     def test_get_approved_leave_days(self):
@@ -173,7 +173,7 @@ class TestModels(TestCase):
         Test get_approved_leave_days
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = user.staffprofile
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
         start = datetime(
             2018, 1, 1, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
 
@@ -194,7 +194,7 @@ class TestModels(TestCase):
         Test get_approved_sick_days
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = user.staffprofile
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
         start = datetime(
             2018, 1, 1, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
 
@@ -215,7 +215,7 @@ class TestModels(TestCase):
         Test StaffProfile get_available_leave_days
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = user.staffprofile
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
         mommy.make('small_small_hr.AnnualLeave', staff=staff, year=2017,
                    leave_type=Leave.REGULAR, allowed_days=21)
 
@@ -241,7 +241,7 @@ class TestModels(TestCase):
         Test StaffProfile get_available_leave_days
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = user.staffprofile
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
         mommy.make('small_small_hr.AnnualLeave', staff=staff, year=2017,
                    leave_type=Leave.SICK, allowed_days=10)
 
@@ -278,7 +278,7 @@ class TestModels(TestCase):
         Test __str__ method on StaffDocument
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = user.staffprofile
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
         self.assertEqual(
             'Mosh Pitt - Dossier',
             mommy.make(
@@ -290,7 +290,7 @@ class TestModels(TestCase):
         Test __str__ method on Leave
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = user.staffprofile
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
         now = timezone.now()
         end = now + timedelta(days=3)
         self.assertEqual(
@@ -304,7 +304,7 @@ class TestModels(TestCase):
         Test __str__ method on OverTime
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = user.staffprofile
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
         now = timezone.now()
         end = now + timedelta(seconds=60 * 60 * 3)
         self.assertEqual(
@@ -319,7 +319,7 @@ class TestModels(TestCase):
         Test get_duration method on OverTime
         """
         user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
-        staff = user.staffprofile
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
         now = timezone.now()
         end = now + timedelta(seconds=60 * 60 * 3)
         self.assertEqual(
