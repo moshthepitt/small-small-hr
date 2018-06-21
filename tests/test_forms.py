@@ -742,6 +742,7 @@ class TestForms(TestCase):
             'nssf': '222222',
             'pin_number': 'A0000000Y',
             'emergency_contact_name': 'Bob Father',
+            'emergency_contact_relationship': 'Father',
             'emergency_contact_number': '+254722111111',
             'phone': '+254722111111',
             'address': 'This is the address.',
@@ -772,6 +773,8 @@ class TestForms(TestCase):
                          staffprofile.data['pin_number'])
         self.assertEqual('Bob Father',
                          staffprofile.data['emergency_contact_name'])
+        self.assertEqual('Father',
+                         staffprofile.data['emergency_contact_relationship'])
         self.assertEqual('+254722111111',
                          staffprofile.data['emergency_contact_number'])
 

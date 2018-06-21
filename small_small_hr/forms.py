@@ -417,6 +417,8 @@ class StaffProfileAdminForm(forms.ModelForm):
     pin_number = forms.CharField(label=_('PIN Number'), required=False)
     emergency_contact_name = forms.CharField(
         label=_('Emergecy Contact Name'), required=False)
+    emergency_contact_relationship = forms.CharField(
+        label=_('Emergecy Contact Relationship'), required=False)
     emergency_contact_number = PhoneNumberField(
         label=_('Emergency Contact Phone Number'), required=False)
 
@@ -444,6 +446,7 @@ class StaffProfileAdminForm(forms.ModelForm):
             'end_date',
             'emergency_contact_name',
             'emergency_contact_number',
+            'emergency_contact_relationship'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -475,6 +478,7 @@ class StaffProfileAdminForm(forms.ModelForm):
             Field('end_date',),
             Field('emergency_contact_name',),
             Field('emergency_contact_number',),
+            Field('emergency_contact_relationship',),
             FormActions(
                 Submit('submitBtn', _('Submit'), css_class='btn-primary'),
             )
@@ -544,6 +548,8 @@ class StaffProfileAdminForm(forms.ModelForm):
             'pin_number': self.cleaned_data.get('pin_number'),
             'emergency_contact_name': self.cleaned_data.get(
                 'emergency_contact_name'),
+            'emergency_contact_relationship': self.cleaned_data.get(
+                'emergency_contact_relationship'),
             'emergency_contact_number': emergency_phone,
         }
         staffprofile.data = json_data
@@ -588,6 +594,7 @@ class StaffProfileAdminCreateForm(StaffProfileAdminForm):
             'end_date',
             'emergency_contact_name',
             'emergency_contact_number',
+            'emergency_contact_relationship'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -620,6 +627,7 @@ class StaffProfileAdminCreateForm(StaffProfileAdminForm):
             Field('end_date',),
             Field('emergency_contact_name',),
             Field('emergency_contact_number',),
+            Field('emergency_contact_relationship',),
             FormActions(
                 Submit('submitBtn', _('Submit'), css_class='btn-primary'),
             )
@@ -650,6 +658,7 @@ class StaffProfileUserForm(StaffProfileAdminForm):
             'birthday',
             'emergency_contact_name',
             'emergency_contact_number',
+            'emergency_contact_relationship'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -676,6 +685,7 @@ class StaffProfileUserForm(StaffProfileAdminForm):
             Field('birthday',),
             Field('emergency_contact_name',),
             Field('emergency_contact_number',),
+            Field('emergency_contact_relationship',),
             FormActions(
                 Submit('submitBtn', _('Submit'), css_class='btn-primary'),
             )
