@@ -539,7 +539,6 @@ class StaffProfileAdminForm(forms.ModelForm):
         staffprofile = super().save()
 
         emergency_phone = self.cleaned_data.get('emergency_contact_number')
-        emergency_phone = emergency_phone.as_e164
 
         json_data = {
             'id_number': self.cleaned_data.get('id_number'),
