@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='small-small-hr',
-    version='0.0.5',
+    version='0.0.6',
     description='Minimal human resource management app for Django',
     license='MIT',
     author='Kelvin Jayanoris',
