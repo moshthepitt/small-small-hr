@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='small-small-hr',
-    version='0.0.6',
+    version=__import__('small_small_hr').__version__,
     description='Minimal human resource management app for Django',
     license='MIT',
     author='Kelvin Jayanoris',
@@ -18,6 +18,7 @@ setup(
         'psycopg2-binary',
         'sorl-thumbnail',
         'django-private-storage',
+        'phonenumberslite',
         'django-phonenumber-field',
         'django-crispy-forms',
         'djangorestframework'
