@@ -61,6 +61,13 @@
             "editable": true,
             "path": "."
         },
+        "phonenumberslite": {
+            "hashes": [
+                "sha256:0054c94d53e7b12cfb95290118cb5108b04270d8fd62851a06a474aad7b1b8d0",
+                "sha256:76d44fd38ec9aec918f65d02b0f18ca4d429f2771d4d3ab8405537b4b35a1005"
+            ],
+            "version": "==8.9.8"
+        },
         "psycopg2-binary": {
             "hashes": [
                 "sha256:04afb59bbbd2eab3148e6816beddc74348078b8c02a1113ea7f7822f5be4afe3",
