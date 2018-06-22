@@ -256,6 +256,7 @@ class TestForms(TestCase):
             form.errors['end'][0]
         )
 
+    @override_settings(SSHR_DEFAULT_TIME=7)
     def test_leaveform_apply(self):
         """
         Test LeaveForm apply for leave
@@ -272,9 +273,9 @@ class TestForms(TestCase):
 
         # 6 days of leave
         start = datetime(
-            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 5, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
         end = datetime(
-            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 10, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
 
         mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
                    leave_type=Leave.REGULAR, carried_over_days=12)
@@ -300,6 +301,7 @@ class TestForms(TestCase):
         self.assertEqual(Leave.PENDING, leave.status)
         self.assertEqual('', leave.comments)
 
+    @override_settings(SSHR_DEFAULT_TIME=7)
     def test_leaveform_no_overlap(self):
         """
         Test LeaveForm no overlap
@@ -316,9 +318,9 @@ class TestForms(TestCase):
 
         # 6 days of leave
         start = datetime(
-            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 5, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
         end = datetime(
-            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 10, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
 
         mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
                    leave_type=Leave.REGULAR, carried_over_days=12)
@@ -347,6 +349,7 @@ class TestForms(TestCase):
             form.errors['end'][0]
         )
 
+    @override_settings(SSHR_DEFAULT_TIME=7)
     def test_leaveform_admin(self):
         """
         Test LeaveForm apply for leave
@@ -363,9 +366,9 @@ class TestForms(TestCase):
 
         # 6 days of leave
         start = datetime(
-            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 5, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
         end = datetime(
-            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 10, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
 
         mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
                    leave_type=Leave.REGULAR, carried_over_days=12)
@@ -393,6 +396,7 @@ class TestForms(TestCase):
         self.assertEqual(Leave.APPROVED, leave.status)
         self.assertEqual('Okay', leave.comments)
 
+    @override_settings(SSHR_DEFAULT_TIME=7)
     def test_leaveform_process(self):
         """
         Test LeaveForm process
@@ -409,9 +413,9 @@ class TestForms(TestCase):
 
         # 6 days of leave
         start = datetime(
-            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 5, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
         end = datetime(
-            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 10, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
 
         mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
                    leave_type=Leave.REGULAR, carried_over_days=4)
@@ -439,6 +443,7 @@ class TestForms(TestCase):
         self.assertEqual(Leave.REJECTED, leave.status)
         self.assertEqual('Just no', leave.comments)
 
+    @override_settings(SSHR_DEFAULT_TIME=7)
     def test_sickleave_apply(self):
         """
         Test LeaveForm apply for sick leave
@@ -455,9 +460,9 @@ class TestForms(TestCase):
 
         # 6 days of leave
         start = datetime(
-            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 5, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
         end = datetime(
-            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 10, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
 
         mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
                    leave_type=Leave.SICK, carried_over_days=4)
@@ -483,6 +488,7 @@ class TestForms(TestCase):
         self.assertEqual(Leave.PENDING, leave.status)
         self.assertEqual('', leave.comments)
 
+    @override_settings(SSHR_DEFAULT_TIME=7)
     def test_sickleave_process(self):
         """
         Test LeaveForm process sick leave
@@ -499,9 +505,9 @@ class TestForms(TestCase):
 
         # 6 days of leave
         start = datetime(
-            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 5, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
         end = datetime(
-            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 10, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
 
         mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
                    leave_type=Leave.SICK, carried_over_days=4)
