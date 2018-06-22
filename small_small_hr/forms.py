@@ -13,10 +13,14 @@ import pytz
 from crispy_forms.bootstrap import Field, FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
+from phonenumber_field.phonenumber import PhoneNumber
 from phonenumber_field.formfields import PhoneNumberField
 
 from small_small_hr.models import (TWOPLACES, Leave, OverTime, Role,
                                    StaffDocument, StaffProfile, AnnualLeave)
+
+
+DEFAULT_TIME = getattr(settings, 'SSHR_DEFAULT_TIME', 7)
 
 
 class AnnualLeaveForm(forms.ModelForm):
@@ -259,7 +263,7 @@ class LeaveForm(forms.ModelForm):
         data = self.cleaned_data['start']
         data = datetime.combine(
             date=data,
-            time=time(0, 0, 0, 0),
+            time=time(DEFAULT_TIME, 0, 0, 0),
             tzinfo=pytz.timezone(settings.TIME_ZONE))
         return data
 
@@ -270,7 +274,7 @@ class LeaveForm(forms.ModelForm):
         data = self.cleaned_data['end']
         data = datetime.combine(
             date=data,
-            time=time(0, 0, 0, 0),
+            time=time(DEFAULT_TIME, 0, 0, 0),
             tzinfo=pytz.timezone(settings.TIME_ZONE))
         return data
 
@@ -284,47 +288,50 @@ class LeaveForm(forms.ModelForm):
         end = cleaned_data.get('end')
         start = cleaned_data.get('start')
 
-        # end year and start year must be the same
-        if end.year != start.year:
-            msg = _('start and end must be from the same year')
-            self.add_error('start', msg)
-            self.add_error('end', msg)
-
-        # end must be later than start
-        if end <= start:
-            self.add_error('end', _("end must be greater than start"))
-
-        # staff profile must have sufficient sick days
-        if leave_type == Leave.SICK:
-            sick_days = staff.get_available_sick_days(year=start.year)
-            if (end - start).days > sick_days:
-                msg = _('Not enough sick days. Available sick days '
-                        f'are {sick_days.quantize(TWOPLACES)}')
+        if all([staff, leave_type, start, end]):
+            # end year and start year must be the same
+            if end.year != start.year:
+                msg = _('start and end must be from the same year')
                 self.add_error('start', msg)
                 self.add_error('end', msg)
 
-        # staff profile must have sufficient leave days
-        if leave_type == Leave.REGULAR:
-            leave_days = staff.get_available_leave_days(year=start.year)
-            if (end - start).days > leave_days:
-                msg = _('Not enough leave days. Available leave days '
-                        f'are {leave_days.quantize(TWOPLACES)}')
+            # end must be later than start
+            if end <= start:
+                self.add_error('end', _("end must be greater than start"))
+
+            # staff profile must have sufficient sick days
+            if leave_type == Leave.SICK:
+                sick_days = staff.get_available_sick_days(year=start.year)
+                if (end - start).days > sick_days:
+                    msg = _('Not enough sick days. Available sick days '
+                            f'are {sick_days.quantize(TWOPLACES)}')
+                    self.add_error('start', msg)
+                    self.add_error('end', msg)
+
+            # staff profile must have sufficient leave days
+            if leave_type == Leave.REGULAR:
+                leave_days = staff.get_available_leave_days(year=start.year)
+                if (end - start).days > leave_days:
+                    msg = _('Not enough leave days. Available leave days '
+                            f'are {leave_days.quantize(TWOPLACES)}')
+                    self.add_error('start', msg)
+                    self.add_error('end', msg)
+
+            # must not overlap
+            # pylint: disable=no-member
+            overlap_qs = Leave.objects.filter(
+                staff=staff,
+                status=Leave.APPROVED,
+                leave_type=leave_type).filter(
+                    Q(start__gte=start) | Q(end__lte=end))
+
+            if self.instance is not None:
+                overlap_qs = overlap_qs.exclude(id=self.instance.id)
+
+            if overlap_qs.exists():
+                msg = _('you cannot have overlapping leave days')
                 self.add_error('start', msg)
                 self.add_error('end', msg)
-
-        # must not overlap
-        # pylint: disable=no-member
-        overlap_qs = Leave.objects.filter(
-            staff=staff, status=Leave.APPROVED, leave_type=leave_type).filter(
-                Q(start__gte=start) | Q(end__lte=end))
-
-        if self.instance is not None:
-            overlap_qs = overlap_qs.exclude(id=self.instance.id)
-
-        if overlap_qs.exists():
-            msg = _('you cannot have overlapping leave days')
-            self.add_error('start', msg)
-            self.add_error('end', msg)
 
 
 class ApplyLeaveForm(LeaveForm):
@@ -539,6 +546,8 @@ class StaffProfileAdminForm(forms.ModelForm):
         staffprofile = super().save()
 
         emergency_phone = self.cleaned_data.get('emergency_contact_number')
+        if isinstance(emergency_phone, PhoneNumber):
+            emergency_phone = emergency_phone.as_e164
 
         json_data = {
             'id_number': self.cleaned_data.get('id_number'),
