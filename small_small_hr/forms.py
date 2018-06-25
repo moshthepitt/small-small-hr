@@ -192,9 +192,15 @@ class ApplyOverTimeForm(OverTimeForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.request = kwargs.pop('request', None)
-        if self.request and self.request.user.staffprofile:
-            self.fields['staff'].queryset = StaffProfile.objects.filter(
-                id=self.request.user.staffprofile.id)
+        if self.request:
+            # pylint: disable=no-member
+            try:
+                self.request.user.staffprofile
+            except StaffProfile.DoesNotExist:
+                pass
+            else:
+                self.fields['staff'].queryset = StaffProfile.objects.filter(
+                    id=self.request.user.staffprofile.id)
         self.helper = FormHelper()
         self.helper.form_tag = True
         self.helper.form_method = 'post'
@@ -358,9 +364,15 @@ class ApplyLeaveForm(LeaveForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.request = kwargs.pop('request', None)
-        if self.request and self.request.user.staffprofile:
-            self.fields['staff'].queryset = StaffProfile.objects.filter(
-                id=self.request.user.staffprofile.id)
+        if self.request:
+            # pylint: disable=no-member
+            try:
+                self.request.user.staffprofile
+            except StaffProfile.DoesNotExist:
+                pass
+            else:
+                self.fields['staff'].queryset = StaffProfile.objects.filter(
+                    id=self.request.user.staffprofile.id)
         self.helper = FormHelper()
         self.helper.form_tag = True
         self.helper.form_method = 'post'
@@ -438,9 +450,15 @@ class UserStaffDocumentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        if self.request and self.request.user.staffprofile:
-            self.fields['staff'].queryset = StaffProfile.objects.filter(
-                id=self.request.user.staffprofile.id)
+        if self.request:
+            # pylint: disable=no-member
+            try:
+                self.request.user.staffprofile
+            except StaffProfile.DoesNotExist:
+                pass
+            else:
+                self.fields['staff'].queryset = StaffProfile.objects.filter(
+                    id=self.request.user.staffprofile.id)
         self.helper = FormHelper()
         self.helper.form_tag = True
         self.helper.form_method = 'post'
