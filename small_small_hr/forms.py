@@ -158,7 +158,7 @@ class OverTimeForm(forms.ModelForm):
         # pylint: disable=no-member
         overlap_qs = OverTime.objects.filter(
             date=date, staff=staff, status=OverTime.APPROVED).filter(
-                Q(start__gte=start) | Q(end__lte=end))
+                Q(start__gte=start) & Q(end__lte=end))
 
         if self.instance is not None:
             overlap_qs = overlap_qs.exclude(id=self.instance.id)
@@ -190,8 +190,17 @@ class ApplyOverTimeForm(OverTimeForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
+        self.request = kwargs.pop('request', None)
+        if self.request:
+            # pylint: disable=no-member
+            try:
+                self.request.user.staffprofile
+            except StaffProfile.DoesNotExist:
+                pass
+            else:
+                self.fields['staff'].queryset = StaffProfile.objects.filter(
+                    id=self.request.user.staffprofile.id)
         self.helper = FormHelper()
         self.helper.form_tag = True
         self.helper.form_method = 'post'
@@ -200,7 +209,7 @@ class ApplyOverTimeForm(OverTimeForm):
         self.helper.html5_required = True
         self.helper.form_id = 'overtime-application-form'
         self.helper.layout = Layout(
-            Field('staff',),
+            Field('staff', type="hidden"),
             Field('date',),
             Field('start',),
             Field('end',),
@@ -323,7 +332,7 @@ class LeaveForm(forms.ModelForm):
                 staff=staff,
                 status=Leave.APPROVED,
                 leave_type=leave_type).filter(
-                    Q(start__gte=start) | Q(end__lte=end))
+                    Q(start__gte=start) & Q(end__lte=end))
 
             if self.instance is not None:
                 overlap_qs = overlap_qs.exclude(id=self.instance.id)
@@ -353,8 +362,17 @@ class ApplyLeaveForm(LeaveForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
+        self.request = kwargs.pop('request', None)
+        if self.request:
+            # pylint: disable=no-member
+            try:
+                self.request.user.staffprofile
+            except StaffProfile.DoesNotExist:
+                pass
+            else:
+                self.fields['staff'].queryset = StaffProfile.objects.filter(
+                    id=self.request.user.staffprofile.id)
         self.helper = FormHelper()
         self.helper.form_tag = True
         self.helper.form_method = 'post'
@@ -363,7 +381,7 @@ class ApplyLeaveForm(LeaveForm):
         self.helper.html5_required = True
         self.helper.form_id = 'leave-application-form'
         self.helper.layout = Layout(
-            Field('staff',),
+            Field('staff', type="hidden"),
             Field('leave_type',),
             Field('start',),
             Field('end',),
@@ -403,6 +421,53 @@ class StaffDocumentForm(forms.ModelForm):
         self.helper.form_id = 'staffdocument-form'
         self.helper.layout = Layout(
             Field('staff',),
+            Field('name',),
+            Field('description',),
+            Field('file',),
+            FormActions(
+                Submit('submitBtn', _('Submit'), css_class='btn-primary'),
+            )
+        )
+
+
+class UserStaffDocumentForm(forms.ModelForm):
+    """
+    Form used when managing one's own StaffDocument objects
+    """
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """
+        Class meta options
+        """
+        model = StaffDocument
+        fields = [
+            'staff',
+            'name',
+            'description',
+            'file',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        if self.request:
+            # pylint: disable=no-member
+            try:
+                self.request.user.staffprofile
+            except StaffProfile.DoesNotExist:
+                pass
+            else:
+                self.fields['staff'].queryset = StaffProfile.objects.filter(
+                    id=self.request.user.staffprofile.id)
+        self.helper = FormHelper()
+        self.helper.form_tag = True
+        self.helper.form_method = 'post'
+        self.helper.render_required_fields = True
+        self.helper.form_show_labels = True
+        self.helper.html5_required = True
+        self.helper.form_id = 'staffdocument-form'
+        self.helper.layout = Layout(
+            Field('staff', type="hidden"),
             Field('name',),
             Field('description',),
             Field('file',),
@@ -509,7 +574,7 @@ class StaffProfileAdminForm(forms.ModelForm):
         """
         value = self.cleaned_data.get('nssf')
         # pylint: disable=no-member
-        if StaffProfile.objects.exclude(
+        if value and StaffProfile.objects.exclude(
                 id=self.instance.id).filter(data__nssf=value).exists():
             raise forms.ValidationError(
                 _('This NSSF number is already in use.'))
@@ -521,7 +586,7 @@ class StaffProfileAdminForm(forms.ModelForm):
         """
         value = self.cleaned_data.get('nhif')
         # pylint: disable=no-member
-        if StaffProfile.objects.exclude(
+        if value and StaffProfile.objects.exclude(
                 id=self.instance.id).filter(data__nhif=value).exists():
             raise forms.ValidationError(
                 _('This NHIF number is already in use.'))
@@ -533,7 +598,7 @@ class StaffProfileAdminForm(forms.ModelForm):
         """
         value = self.cleaned_data.get('pin_number')
         # pylint: disable=no-member
-        if StaffProfile.objects.exclude(
+        if value and StaffProfile.objects.exclude(
                 id=self.instance.id).filter(data__pin_number=value).exists():
             raise forms.ValidationError(
                 _('This PIN number is already in use.'))
@@ -658,7 +723,6 @@ class StaffProfileUserForm(StaffProfileAdminForm):
             'id_number',
             'phone',
             'sex',
-            'role',
             'nhif',
             'nssf',
             'pin_number',
@@ -685,7 +749,6 @@ class StaffProfileUserForm(StaffProfileAdminForm):
             Field('phone',),
             Field('id_number',),
             Field('sex',),
-            Field('role',),
             Field('nhif',),
             Field('nssf',),
             Field('pin_number',),
