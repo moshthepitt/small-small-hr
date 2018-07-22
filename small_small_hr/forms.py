@@ -488,9 +488,9 @@ class StaffProfileAdminForm(forms.ModelForm):
     nssf = forms.CharField(label=_('NSSF'), required=False)
     pin_number = forms.CharField(label=_('PIN Number'), required=False)
     emergency_contact_name = forms.CharField(
-        label=_('Emergecy Contact Name'), required=False)
+        label=_('Emergency Contact Name'), required=False)
     emergency_contact_relationship = forms.CharField(
-        label=_('Emergecy Contact Relationship'), required=False)
+        label=_('Emergency Contact Relationship'), required=False)
     emergency_contact_number = PhoneNumberField(
         label=_('Emergency Contact Phone Number'), required=False)
 
