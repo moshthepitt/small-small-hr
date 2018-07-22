@@ -7,13 +7,14 @@ from decimal import Decimal
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
-from django.db.models import Value as V
 from django.db.models import Sum
+from django.db.models import Value as V
 from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext as _
 
 from phonenumber_field.modelfields import PhoneNumberField
 from private_storage.fields import PrivateFileField
+from sorl.thumbnail import ImageField
 
 from small_small_hr.managers import LeaveManager
 
@@ -83,6 +84,9 @@ class StaffProfile(TimeStampedModel, models.Model):
 
     user = models.OneToOneField(
         USER, verbose_name=_('User'), on_delete=models.CASCADE)
+    image = ImageField(upload_to="staff-images/", max_length=255,
+                       verbose_name=_("Profile Image"),
+                       help_text=_("A square image works best"), blank=True)
     sex = models.CharField(_('Gender'), choices=SEX_CHOICES, max_length=1,
                            default=NOT_KNOWN, blank=True, db_index=True)
     role = models.ForeignKey(Role, verbose_name=_('Role'), blank=True,
@@ -199,7 +203,7 @@ class StaffDocument(TimeStampedModel, models.Model):
     description = models.TextField(_('Description'), blank=True, default='')
     file = PrivateFileField(
         _('File'), upload_to='staff-documents/',
-        help_text=_("Upload staff member drocument"),
+        help_text=_("Upload staff member document"),
         content_types=[
             'application/pdf',
             'application/msword',
