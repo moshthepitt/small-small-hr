@@ -739,50 +739,65 @@ class TestForms(TestCase):
         request.session = {}
         request.user = AnonymousUser()
 
-        data = {
-            'first_name': 'Bob',
-            'last_name': 'Mbugua',
-            'id_number': '123456789',
-            'sex': StaffProfile.MALE,
-            'nhif': '111111',
-            'nssf': '222222',
-            'pin_number': 'A0000000Y',
-            'emergency_contact_name': 'Bob Father',
-            'emergency_contact_relationship': 'Father',
-            'emergency_contact_number': '+254722111111',
-            'phone': '+254722111111',
-            'address': 'This is the address.',
-            'birthday': '1996-01-27'
-        }
+        path = os.path.join(
+            BASE_DIR, 'tests', 'fixtures', 'profile.png')
 
-        form = StaffProfileUserForm(data=data, instance=staffprofile,
-                                    request=request)
-        self.assertTrue(form.is_valid())
-        form.save()
+        with open(path, 'r+b') as image_file:
+            data = {
+                'first_name': 'Bob',
+                'last_name': 'Mbugua',
+                'id_number': '123456789',
+                'sex': StaffProfile.MALE,
+                'nhif': '111111',
+                'nssf': '222222',
+                'pin_number': 'A0000000Y',
+                'emergency_contact_name': 'Bob Father',
+                'emergency_contact_relationship': 'Father',
+                'emergency_contact_number': '+254722111111',
+                'phone': '+254722111111',
+                'address': 'This is the address.',
+                'birthday': '1996-01-27',
+                'image': image_file,
+            }
 
-        user.refresh_from_db()
+            file_dict = {
+                'image': SimpleUploadedFile(
+                    name=image_file.name,
+                    content=image_file.read(),
+                    content_type='image/png'
+                )}
 
-        self.assertEqual('Bob Mbugua', user.staffprofile.get_name())
-        self.assertEqual(StaffProfile.MALE, staffprofile.sex)
-        self.assertEqual('+254722111111', staffprofile.phone.as_e164)
+            form = StaffProfileUserForm(data=data, instance=staffprofile,
+                                        request=request, files=file_dict)
+            self.assertTrue(form.is_valid())
+            form.save()
 
-        self.assertEqual('This is the address.', staffprofile.address)
-        self.assertEqual('1996-01-27', str(staffprofile.birthday))
+            user.refresh_from_db()
 
-        self.assertEqual('123456789',
-                         staffprofile.data['id_number'])
-        self.assertEqual('111111',
-                         staffprofile.data['nhif'])
-        self.assertEqual('222222',
-                         staffprofile.data['nssf'])
-        self.assertEqual('A0000000Y',
-                         staffprofile.data['pin_number'])
-        self.assertEqual('Bob Father',
-                         staffprofile.data['emergency_contact_name'])
-        self.assertEqual('Father',
-                         staffprofile.data['emergency_contact_relationship'])
-        self.assertEqual('+254722111111',
-                         staffprofile.data['emergency_contact_number'])
+            self.assertEqual('Bob Mbugua', user.staffprofile.get_name())
+            self.assertEqual(StaffProfile.MALE, staffprofile.sex)
+            self.assertEqual('+254722111111', staffprofile.phone.as_e164)
+
+            self.assertEqual('This is the address.', staffprofile.address)
+            self.assertEqual('1996-01-27', str(staffprofile.birthday))
+
+            self.assertEqual('123456789',
+                             staffprofile.data['id_number'])
+            self.assertEqual('111111',
+                             staffprofile.data['nhif'])
+            self.assertEqual('222222',
+                             staffprofile.data['nssf'])
+            self.assertEqual('A0000000Y',
+                             staffprofile.data['pin_number'])
+            self.assertEqual('Bob Father',
+                             staffprofile.data['emergency_contact_name'])
+            self.assertEqual('Father',
+                             staffprofile.data['emergency_contact_relationship'])
+            self.assertEqual('+254722111111',
+                             staffprofile.data['emergency_contact_number'])
+
+        with open(path, 'r+b') as image_file:
+            self.assertTrue(image_file.read(), staffprofile.image.read())
 
     def test_staff_profile_admin_create_form(self):
         """
@@ -794,57 +809,73 @@ class TestForms(TestCase):
         request.session = {}
         request.user = AnonymousUser()
 
-        data = {
-            'user': user.id,
-            'first_name': 'Bob',
-            'last_name': 'Mbugua',
-            'id_number': '123456789',
-            'sex': StaffProfile.MALE,
-            'nhif': '111111',
-            'nssf': '222222',
-            'pin_number': 'A0000000Y',
-            'emergency_contact_name': 'Bob Father',
-            'emergency_contact_number': '+254722111111',
-            'phone': '+254722111111',
-            'address': 'This is the address.',
-            'birthday': '1996-01-27',
-            'leave_days': 21,
-            'sick_days': 9,
-            'overtime_allowed': True,
-            'start_date': '2017-09-25',
-            'end_date': '2018-12-31',
-        }
+        path = os.path.join(
+            BASE_DIR, 'tests', 'fixtures', 'profile.png')
 
-        form = StaffProfileAdminCreateForm(data=data, request=request)
-        self.assertTrue(form.is_valid())
-        staffprofile = form.save()
+        with open(path, 'r+b') as image_file:
+            data = {
+                'user': user.id,
+                'first_name': 'Bob',
+                'last_name': 'Mbugua',
+                'id_number': '123456789',
+                'sex': StaffProfile.MALE,
+                'nhif': '111111',
+                'nssf': '222222',
+                'pin_number': 'A0000000Y',
+                'emergency_contact_name': 'Bob Father',
+                'emergency_contact_number': '+254722111111',
+                'phone': '+254722111111',
+                'address': 'This is the address.',
+                'birthday': '1996-01-27',
+                'leave_days': 21,
+                'sick_days': 9,
+                'overtime_allowed': True,
+                'start_date': '2017-09-25',
+                'end_date': '2018-12-31',
+                'image': image_file,
+            }
 
-        user.refresh_from_db()
+            file_dict = {
+                'image': SimpleUploadedFile(
+                    name=image_file.name,
+                    content=image_file.read(),
+                    content_type='image/png'
+                )}
 
-        self.assertEqual('Bob Mbugua', user.staffprofile.get_name())
-        self.assertEqual(StaffProfile.MALE, staffprofile.sex)
-        self.assertEqual('+254722111111', staffprofile.phone.as_e164)
-        self.assertEqual(21, staffprofile.leave_days)
-        self.assertEqual(9, staffprofile.sick_days)
-        self.assertEqual(True, staffprofile.overtime_allowed)
+            form = StaffProfileAdminCreateForm(
+                data=data, files=file_dict, request=request)
+            self.assertTrue(form.is_valid())
+            staffprofile = form.save()
 
-        self.assertEqual('This is the address.', staffprofile.address)
-        self.assertEqual('1996-01-27', str(staffprofile.birthday))
-        self.assertEqual('2017-09-25', str(staffprofile.start_date))
-        self.assertEqual('2018-12-31', str(staffprofile.end_date))
+            user.refresh_from_db()
 
-        self.assertEqual('123456789',
-                         staffprofile.data['id_number'])
-        self.assertEqual('111111',
-                         staffprofile.data['nhif'])
-        self.assertEqual('222222',
-                         staffprofile.data['nssf'])
-        self.assertEqual('A0000000Y',
-                         staffprofile.data['pin_number'])
-        self.assertEqual('Bob Father',
-                         staffprofile.data['emergency_contact_name'])
-        self.assertEqual('+254722111111',
-                         staffprofile.data['emergency_contact_number'])
+            self.assertEqual('Bob Mbugua', user.staffprofile.get_name())
+            self.assertEqual(StaffProfile.MALE, staffprofile.sex)
+            self.assertEqual('+254722111111', staffprofile.phone.as_e164)
+            self.assertEqual(21, staffprofile.leave_days)
+            self.assertEqual(9, staffprofile.sick_days)
+            self.assertEqual(True, staffprofile.overtime_allowed)
+
+            self.assertEqual('This is the address.', staffprofile.address)
+            self.assertEqual('1996-01-27', str(staffprofile.birthday))
+            self.assertEqual('2017-09-25', str(staffprofile.start_date))
+            self.assertEqual('2018-12-31', str(staffprofile.end_date))
+
+            self.assertEqual('123456789',
+                             staffprofile.data['id_number'])
+            self.assertEqual('111111',
+                             staffprofile.data['nhif'])
+            self.assertEqual('222222',
+                             staffprofile.data['nssf'])
+            self.assertEqual('A0000000Y',
+                             staffprofile.data['pin_number'])
+            self.assertEqual('Bob Father',
+                             staffprofile.data['emergency_contact_name'])
+            self.assertEqual('+254722111111',
+                             staffprofile.data['emergency_contact_number'])
+
+        with open(path, 'r+b') as image_file:
+            self.assertTrue(image_file.read(), staffprofile.image.read())
 
     def test_staff_profile_admin_form(self):
         """
@@ -857,58 +888,73 @@ class TestForms(TestCase):
         request.session = {}
         request.user = AnonymousUser()
 
-        data = {
-            'user': user.id,
-            'first_name': 'Bob',
-            'last_name': 'Mbugua',
-            'id_number': '123456789',
-            'sex': StaffProfile.MALE,
-            'nhif': '111111',
-            'nssf': '222222',
-            'pin_number': 'A0000000Y',
-            'emergency_contact_name': 'Bob Father',
-            'emergency_contact_number': '+254722111111',
-            'phone': '+254722111111',
-            'address': 'This is the address.',
-            'birthday': '1996-01-27',
-            'leave_days': 21,
-            'sick_days': 9,
-            'overtime_allowed': True,
-            'start_date': '2017-09-25',
-            'end_date': '2018-12-31',
-        }
+        path = os.path.join(
+            BASE_DIR, 'tests', 'fixtures', 'profile.png')
 
-        form = StaffProfileAdminForm(data=data, instance=staffprofile,
-                                     request=request)
-        self.assertTrue(form.is_valid())
-        form.save()
+        with open(path, 'r+b') as image_file:
+            data = {
+                'user': user.id,
+                'first_name': 'Bob',
+                'last_name': 'Mbugua',
+                'id_number': '123456789',
+                'sex': StaffProfile.MALE,
+                'nhif': '111111',
+                'nssf': '222222',
+                'pin_number': 'A0000000Y',
+                'emergency_contact_name': 'Bob Father',
+                'emergency_contact_number': '+254722111111',
+                'phone': '+254722111111',
+                'address': 'This is the address.',
+                'birthday': '1996-01-27',
+                'leave_days': 21,
+                'sick_days': 9,
+                'overtime_allowed': True,
+                'start_date': '2017-09-25',
+                'end_date': '2018-12-31',
+                'image': image_file,
+            }
 
-        user.refresh_from_db()
+            file_dict = {
+                'image': SimpleUploadedFile(
+                    name=image_file.name,
+                    content=image_file.read(),
+                    content_type='image/png'
+                )}
 
-        self.assertEqual('Bob Mbugua', user.staffprofile.get_name())
-        self.assertEqual(StaffProfile.MALE, staffprofile.sex)
-        self.assertEqual('+254722111111', staffprofile.phone.as_e164)
-        self.assertEqual(21, staffprofile.leave_days)
-        self.assertEqual(9, staffprofile.sick_days)
-        self.assertEqual(True, staffprofile.overtime_allowed)
+            form = StaffProfileAdminForm(data=data, instance=staffprofile,
+                                         request=request, files=file_dict)
+            self.assertTrue(form.is_valid())
+            form.save()
 
-        self.assertEqual('This is the address.', staffprofile.address)
-        self.assertEqual('1996-01-27', str(staffprofile.birthday))
-        self.assertEqual('2017-09-25', str(staffprofile.start_date))
-        self.assertEqual('2018-12-31', str(staffprofile.end_date))
+            user.refresh_from_db()
 
-        self.assertEqual('123456789',
-                         staffprofile.data['id_number'])
-        self.assertEqual('111111',
-                         staffprofile.data['nhif'])
-        self.assertEqual('222222',
-                         staffprofile.data['nssf'])
-        self.assertEqual('A0000000Y',
-                         staffprofile.data['pin_number'])
-        self.assertEqual('Bob Father',
-                         staffprofile.data['emergency_contact_name'])
-        self.assertEqual('+254722111111',
-                         staffprofile.data['emergency_contact_number'])
+            self.assertEqual('Bob Mbugua', user.staffprofile.get_name())
+            self.assertEqual(StaffProfile.MALE, staffprofile.sex)
+            self.assertEqual('+254722111111', staffprofile.phone.as_e164)
+            self.assertEqual(21, staffprofile.leave_days)
+            self.assertEqual(9, staffprofile.sick_days)
+            self.assertEqual(True, staffprofile.overtime_allowed)
+
+            self.assertEqual('This is the address.', staffprofile.address)
+            self.assertEqual('1996-01-27', str(staffprofile.birthday))
+            self.assertEqual('2017-09-25', str(staffprofile.start_date))
+            self.assertEqual('2018-12-31', str(staffprofile.end_date))
+
+            self.assertEqual('123456789',
+                             staffprofile.data['id_number'])
+            self.assertEqual('111111',
+                             staffprofile.data['nhif'])
+            self.assertEqual('222222',
+                             staffprofile.data['nssf'])
+            self.assertEqual('A0000000Y',
+                             staffprofile.data['pin_number'])
+            self.assertEqual('Bob Father',
+                             staffprofile.data['emergency_contact_name'])
+            self.assertEqual('+254722111111',
+                             staffprofile.data['emergency_contact_number'])
+
+        with open(path, 'r+b') as image_file:
+            self.assertTrue(image_file.read(), staffprofile.image.read())
 
     def test_staffprofile_unique_pin_number(self):
         """
