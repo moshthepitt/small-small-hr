@@ -21,7 +21,8 @@ setup(
         'phonenumberslite',
         'django-phonenumber-field',
         'django-crispy-forms',
-        'djangorestframework'
+        'djangorestframework',
+        'sorl-thumbnail',
     ],
     classifiers=[
         'Programming Language :: Python',
