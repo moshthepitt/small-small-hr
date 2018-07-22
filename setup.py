@@ -23,6 +23,7 @@ setup(
         'django-crispy-forms',
         'djangorestframework',
         'sorl-thumbnail',
+        'Pillow'
     ],
     classifiers=[
         'Programming Language :: Python',
