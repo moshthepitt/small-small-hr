@@ -791,8 +791,8 @@ class TestForms(TestCase):
                              staffprofile.data['pin_number'])
             self.assertEqual('Bob Father',
                              staffprofile.data['emergency_contact_name'])
-            self.assertEqual('Father',
-                             staffprofile.data['emergency_contact_relationship'])
+            self.assertEqual(
+                'Father', staffprofile.data['emergency_contact_relationship'])
             self.assertEqual('+254722111111',
                              staffprofile.data['emergency_contact_number'])
 
