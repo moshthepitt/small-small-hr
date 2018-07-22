@@ -22,3 +22,4 @@ ipdb = "*"
 model-mommy = "*"
 "autopep8" = "*"
 tblib = "*"
+pylint-django = {git = "https://github.com/PyCQA/pylint-django.git", ref = "4316c3d90f4ac6cbbeddfc8d431f5d4e031d5cf1"}
