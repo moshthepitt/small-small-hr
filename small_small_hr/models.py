@@ -33,7 +33,7 @@ class TimeStampedModel(models.Model):
         auto_now=True)
 
     # pylint: disable=too-few-public-methods
-    class Meta(object):
+    class Meta:
         """
         Meta options for TimeStampedModel
         """
@@ -47,7 +47,7 @@ class Role(TimeStampedModel, models.Model):
     name = models.CharField(_('Name'), max_length=255)
     description = models.TextField(_('Description'), blank=True, default='')
 
-    class Meta(object):  # pylint: disable=too-few-public-methods
+    class Meta:  # pylint: disable=too-few-public-methods
         """
         Meta options for StaffDocument
         """
@@ -108,7 +108,7 @@ class StaffProfile(TimeStampedModel, models.Model):
         help_text=_('The end date of employment'))
     data = JSONField(_('Data'), default=dict, blank=True)
 
-    class Meta(object):  # pylint: disable=too-few-public-methods
+    class Meta:  # pylint: disable=too-few-public-methods
         """
         Meta options for StaffProfile
         """
@@ -186,7 +186,7 @@ class StaffProfile(TimeStampedModel, models.Model):
             return leave_record.get_available_leave_days()
 
     def __str__(self):
-        return self.get_name()
+        return self.get_name()  # pylint: disable=no-member
 
 
 class StaffDocument(TimeStampedModel, models.Model):
@@ -210,7 +210,7 @@ class StaffDocument(TimeStampedModel, models.Model):
         max_file_size=1048576
     )
 
-    class Meta(object):  # pylint: disable=too-few-public-methods
+    class Meta:  # pylint: disable=too-few-public-methods
         """
         Meta options for StaffDocument
         """
@@ -248,7 +248,7 @@ class BaseStaffRequest(TimeStampedModel, models.Model):
         blank=True, db_index=True)
     comments = models.TextField(_('Comments'), blank=True, default='')
 
-    class Meta(object):  # pylint: disable=too-few-public-methods
+    class Meta:  # pylint: disable=too-few-public-methods
         """
         Meta options for StaffDocument
         """
@@ -273,7 +273,7 @@ class Leave(BaseStaffRequest):
 
     objects = LeaveManager()
 
-    class Meta(object):  # pylint: disable=too-few-public-methods
+    class Meta:  # pylint: disable=too-few-public-methods
         """
         Meta options for Leave
         """
@@ -296,7 +296,7 @@ class OverTime(BaseStaffRequest):
     start = models.TimeField(_('Start'), auto_now=False, auto_now_add=False)
     end = models.TimeField(_('End'), auto_now=False, auto_now_add=False)
 
-    class Meta(object):  # pylint: disable=too-few-public-methods
+    class Meta:  # pylint: disable=too-few-public-methods
         """
         Meta options for OverTime
         """
@@ -306,8 +306,7 @@ class OverTime(BaseStaffRequest):
         ordering = ['staff', 'date', 'start']
 
     def __str__(self):
-        # pylint: disable=no-member
-        name = self.staff.get_name()
+        name = self.staff.get_name()  # pylint: disable=no-member
         return _(f'{name}: {self.date} from {self.start} to {self.end}')
 
     def get_duration(self):
@@ -344,7 +343,7 @@ class AnnualLeave(TimeStampedModel, models.Model):
         _('Carried Over Leave days'), default=0, blank=True,
         help_text=_('Number of leave days carried over into this year.'))
 
-    class Meta(object):  # pylint: disable=too-few-public-methods
+    class Meta:  # pylint: disable=too-few-public-methods
         """
         Meta options for AnnualLeave
         """
