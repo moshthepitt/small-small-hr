@@ -211,7 +211,7 @@ class StaffDocument(TimeStampedModel, models.Model):
             'image/jpeg',
             'image/png'
         ],
-        max_file_size=1048576
+        max_file_size=10485760
     )
     public = models.BooleanField(
         _('Public'),
