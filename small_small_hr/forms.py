@@ -413,6 +413,8 @@ class StaffDocumentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
+        if self.instance and self.instance.file:
+            self.fields['file'].required = False
         self.helper = FormHelper()
         self.helper.form_tag = True
         self.helper.form_method = 'post'
@@ -461,6 +463,8 @@ class UserStaffDocumentForm(forms.ModelForm):
             else:
                 self.fields['staff'].queryset = StaffProfile.objects.filter(
                     id=self.request.user.staffprofile.id)
+        if self.instance and self.instance.file:
+            self.fields['file'].required = False
         self.helper = FormHelper()
         self.helper.form_tag = True
         self.helper.form_method = 'post'
@@ -527,6 +531,8 @@ class StaffProfileAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
+        if self.instance and self.instance.image:
+            self.fields['image'].required = False
         self.helper = FormHelper()
         self.helper.form_tag = True
         self.helper.form_method = 'post'
@@ -678,6 +684,8 @@ class StaffProfileAdminCreateForm(StaffProfileAdminForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
+        if self.instance and self.instance.image:
+            self.fields['image'].required = False
         self.helper = FormHelper()
         self.helper.form_tag = True
         self.helper.form_method = 'post'
