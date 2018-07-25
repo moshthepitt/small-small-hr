@@ -213,6 +213,10 @@ class StaffDocument(TimeStampedModel, models.Model):
         ],
         max_file_size=1048576
     )
+    public = models.BooleanField(
+        _('Public'),
+        help_text=_('If public, it will be available to everyone.'),
+        blank=True, default=False)
 
     class Meta:  # pylint: disable=too-few-public-methods
         """
