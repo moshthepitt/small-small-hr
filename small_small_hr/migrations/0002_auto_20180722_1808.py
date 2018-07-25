@@ -16,11 +16,21 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='staffprofile',
             name='image',
-            field=sorl.thumbnail.fields.ImageField(blank=True, help_text='A square image works best', max_length=255, upload_to='staff-images/', verbose_name='Profile Image'),
+            field=sorl.thumbnail.fields.ImageField(
+                blank=True,
+                help_text='A square image works best',
+                max_length=255,
+                upload_to='staff-images/',
+                verbose_name='Profile Image'),
         ),
         migrations.AlterField(
             model_name='staffdocument',
             name='file',
-            field=private_storage.fields.PrivateFileField(help_text='Upload staff member document', storage=private_storage.storage.files.PrivateFileSystemStorage(), upload_to='staff-documents/', verbose_name='File'),
+            field=private_storage.fields.PrivateFileField(
+                help_text='Upload staff member document',
+                storage=private_storage.storage.files.PrivateFileSystemStorage(
+                ),
+                upload_to='staff-documents/',
+                verbose_name='File'),
         ),
     ]
