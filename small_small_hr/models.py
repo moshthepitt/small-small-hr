@@ -94,7 +94,7 @@ class StaffProfile(TimeStampedModel, models.Model):
                              on_delete=models.SET_NULL)
     phone = PhoneNumberField(_('Phone'), blank=True, default='')
     address = models.TextField(_('Addresss'), blank=True, default="")
-    birthday = models.DateField(_('Birth day'), blank=True, default=None,
+    birthday = models.DateField(_('Birthday'), blank=True, default=None,
                                 null=True)
     leave_days = models.PositiveIntegerField(
         _('Leave days'), default=21, blank=True,

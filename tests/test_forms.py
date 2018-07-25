@@ -731,6 +731,15 @@ class TestForms(TestCase):
         with open(path, 'r+b') as contract_file:
             self.assertTrue(contract_file.read(), doc.file.read())
 
+        # on updating it, check that file is not required
+        data2 = {
+            'staff': staffprofile.id,
+            'name': 'Employment Contract',
+            'description': 'This is the employment contract!'
+        }
+        form2 = StaffDocumentForm(data=data2, instance=doc, request=request)
+        self.assertTrue(form2.is_valid())
+
     @override_settings(PRIVATE_STORAGE_ROOT='/tmp/')
     def test_userstaffdocumentform(self):
         """
@@ -775,6 +784,15 @@ class TestForms(TestCase):
 
         with open(path, 'r+b') as contract_file:
             self.assertTrue(contract_file.read(), doc.file.read())
+
+        # on updating it, check that file is not required
+        data2 = {
+            'staff': staffprofile.id,
+            'name': 'Employment Contract',
+            'description': 'This is the employment contract!'
+        }
+        form2 = StaffDocumentForm(data=data2, instance=doc, request=request)
+        self.assertTrue(form2.is_valid())
 
     def test_staff_profile_user_form(self):
         """
@@ -846,6 +864,64 @@ class TestForms(TestCase):
 
         with open(path, 'r+b') as image_file:
             self.assertTrue(image_file.read(), staffprofile.image.read())
+
+    def test_staffprofile_user_form_no_image(self):
+        """
+        Test StaffProfileUserForm image not required on update
+        """
+        user = mommy.make('auth.User')
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        path = os.path.join(
+            BASE_DIR, 'tests', 'fixtures', 'profile.png')
+
+        with open(path, 'r+b') as image_file:
+            data = {
+                'first_name': 'Bob',
+                'last_name': 'Mbugua',
+                'id_number': '123456789',
+                'sex': StaffProfile.MALE,
+                'nhif': '111111',
+                'nssf': '222222',
+                'pin_number': 'A0000000Y',
+                'emergency_contact_name': 'Bob Father',
+                'emergency_contact_relationship': 'Father',
+                'emergency_contact_number': '+254722111111',
+                'phone': '+254722111111',
+                'address': 'This is the address.',
+                'birthday': '1996-01-27',
+                'image': image_file,
+            }
+
+            file_dict = {
+                'image': SimpleUploadedFile(
+                    name=image_file.name,
+                    content=image_file.read(),
+                    content_type='image/png'
+                )}
+
+            form = StaffProfileUserForm(data=data, instance=staffprofile,
+                                        request=request, files=file_dict)
+            self.assertTrue(form.is_valid())
+            form.save()
+
+        staffprofile.refresh_from_db()
+        data2 = {
+            'first_name': 'Bobbie',
+            'last_name': 'B',
+            'id_number': 6666,
+        }
+
+        form2 = StaffProfileUserForm(data=data2, instance=staffprofile,
+                                     request=request)
+        self.assertTrue(form2.is_valid())
+        form2.save()
+        staffprofile.refresh_from_db()
+        self.assertEqual('Bobbie B', user.staffprofile.get_name())
 
     def test_staff_profile_admin_create_form(self):
         """
@@ -1003,6 +1079,70 @@ class TestForms(TestCase):
 
         with open(path, 'r+b') as image_file:
             self.assertTrue(image_file.read(), staffprofile.image.read())
+
+    def test_staffprofile_admin_form_no_image(self):
+        """
+        Test StaffProfileAdminForm image not required when editting
+        """
+        user = mommy.make('auth.User')
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        path = os.path.join(
+            BASE_DIR, 'tests', 'fixtures', 'profile.png')
+
+        with open(path, 'r+b') as image_file:
+            data = {
+                'user': user.id,
+                'first_name': 'Bob',
+                'last_name': 'Mbugua',
+                'id_number': '123456789',
+                'sex': StaffProfile.MALE,
+                'nhif': '111111',
+                'nssf': '222222',
+                'pin_number': 'A0000000Y',
+                'emergency_contact_name': 'Bob Father',
+                'emergency_contact_number': '+254722111111',
+                'phone': '+254722111111',
+                'address': 'This is the address.',
+                'birthday': '1996-01-27',
+                'leave_days': 21,
+                'sick_days': 9,
+                'overtime_allowed': True,
+                'start_date': '2017-09-25',
+                'end_date': '2018-12-31',
+                'image': image_file,
+            }
+
+            file_dict = {
+                'image': SimpleUploadedFile(
+                    name=image_file.name,
+                    content=image_file.read(),
+                    content_type='image/png'
+                )}
+
+            form = StaffProfileAdminForm(data=data, instance=staffprofile,
+                                         request=request, files=file_dict)
+            self.assertTrue(form.is_valid())
+            form.save()
+
+        staffprofile.refresh_from_db()
+        data2 = {
+            'user': user.id,
+            'first_name': 'Bobbie',
+            'last_name': 'B',
+            'id_number': 6666,
+        }
+
+        form2 = StaffProfileAdminForm(data=data2, instance=staffprofile,
+                                      request=request)
+        self.assertTrue(form2.is_valid())
+        form2.save()
+        staffprofile.refresh_from_db()
+        self.assertEqual('Bobbie B', user.staffprofile.get_name())
 
     def test_staffprofile_unique_pin_number(self):
         """
