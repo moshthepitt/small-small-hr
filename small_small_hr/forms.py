@@ -406,6 +406,7 @@ class StaffDocumentForm(forms.ModelForm):
             'staff',
             'name',
             'description',
+            'public',
             'file',
         ]
 
@@ -424,6 +425,7 @@ class StaffDocumentForm(forms.ModelForm):
             Field('name',),
             Field('description',),
             Field('file',),
+            Field('public',),
             FormActions(
                 Submit('submitBtn', _('Submit'), css_class='btn-primary'),
             )
