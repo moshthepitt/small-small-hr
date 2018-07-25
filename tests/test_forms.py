@@ -731,6 +731,15 @@ class TestForms(TestCase):
         with open(path, 'r+b') as contract_file:
             self.assertTrue(contract_file.read(), doc.file.read())
 
+        # on updating it, check that file is not required
+        data2 = {
+            'staff': staffprofile.id,
+            'name': 'Employment Contract',
+            'description': 'This is the employment contract!'
+        }
+        form2 = StaffDocumentForm(data=data2, instance=doc, request=request)
+        self.assertTrue(form2.is_valid())
+
     @override_settings(PRIVATE_STORAGE_ROOT='/tmp/')
     def test_userstaffdocumentform(self):
         """
@@ -775,6 +784,15 @@ class TestForms(TestCase):
 
         with open(path, 'r+b') as contract_file:
             self.assertTrue(contract_file.read(), doc.file.read())
+
+        # on updating it, check that file is not required
+        data2 = {
+            'staff': staffprofile.id,
+            'name': 'Employment Contract',
+            'description': 'This is the employment contract!'
+        }
+        form2 = StaffDocumentForm(data=data2, instance=doc, request=request)
+        self.assertTrue(form2.is_valid())
 
     def test_staff_profile_user_form(self):
         """
