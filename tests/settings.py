@@ -40,6 +40,7 @@ USE_TZ = True
 SECRET_KEY = "i love oov"
 
 PRIVATE_STORAGE_ROOT = '/tmp/'
+MEDIA_ROOT = '/tmp/'
 PRIVATE_STORAGE_AUTH_FUNCTION = 'private_storage.permissions.allow_staff'
 
 # try and load local_settings if present

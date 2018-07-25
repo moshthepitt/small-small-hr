@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
     UserSerializer class
     """
 
-    class Meta(object):  # pylint:  disable=too-few-public-methods
+    class Meta:  # pylint:  disable=too-few-public-methods
         """
         meta options
         """
@@ -45,7 +45,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
     emergency_contact_name = serializers.SerializerMethodField()
     emergency_contact_number = serializers.SerializerMethodField()
 
-    class Meta(object):  # pylint:  disable=too-few-public-methods
+    class Meta:  # pylint:  disable=too-few-public-methods
         """
         class meta options
         """
