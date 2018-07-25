@@ -16,7 +16,8 @@ from small_small_hr.forms import (AnnualLeaveForm, ApplyLeaveForm,
                                   ApplyOverTimeForm, LeaveForm, OverTimeForm,
                                   RoleForm, StaffDocumentForm,
                                   StaffProfileAdminCreateForm,
-                                  StaffProfileAdminForm, StaffProfileUserForm)
+                                  StaffProfileAdminForm, StaffProfileUserForm,
+                                  UserStaffDocumentForm)
 from small_small_hr.models import Leave, OverTime, StaffProfile
 from small_small_hr.serializers import StaffProfileSerializer
 
@@ -705,7 +706,8 @@ class TestForms(TestCase):
                 'staff': staffprofile.id,
                 'name': 'Employment Contract',
                 'description': 'This is the employment contract!',
-                'file': contract_file
+                'file': contract_file,
+                'public': True
             }
 
             file_dict = {
@@ -722,6 +724,52 @@ class TestForms(TestCase):
 
             self.assertEqual(staffprofile, doc.staff)
             self.assertEqual('Employment Contract', doc.name)
+            self.assertEqual(True, doc.public)
+            self.assertEqual(
+                'This is the employment contract!', doc.description)
+
+        with open(path, 'r+b') as contract_file:
+            self.assertTrue(contract_file.read(), doc.file.read())
+
+    @override_settings(PRIVATE_STORAGE_ROOT='/tmp/')
+    def test_userstaffdocumentform(self):
+        """
+        Test UserStaffDocumentForm
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = user
+
+        path = os.path.join(
+            BASE_DIR, 'tests', 'fixtures', 'contract.pdf')
+
+        with open(path, 'r+b') as contract_file:
+            data = {
+                'staff': staffprofile.id,
+                'name': 'Employment Contract',
+                'description': 'This is the employment contract!',
+                'file': contract_file
+            }
+
+            file_dict = {
+                'file': SimpleUploadedFile(
+                    name=contract_file.name,
+                    content=contract_file.read(),
+                    content_type='application/pdf'
+                )}
+
+            form = UserStaffDocumentForm(
+                data=data, files=file_dict, request=request)
+
+            self.assertTrue(form.is_valid())
+            doc = form.save()
+
+            self.assertEqual(staffprofile, doc.staff)
+            self.assertEqual('Employment Contract', doc.name)
+            self.assertEqual(False, doc.public)
             self.assertEqual(
                 'This is the employment contract!', doc.description)
 
