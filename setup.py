@@ -13,7 +13,7 @@ setup(
     url='https://github.com/moshthepitt/small-small-hr',
     packages=find_packages(exclude=['docs', 'tests']),
     install_requires=[
-        'Django >= 1.11',
+        'Django >= 2.0.8',
         'voluptuous',
         'psycopg2-binary',
         'sorl-thumbnail',

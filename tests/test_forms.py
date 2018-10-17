@@ -3,13 +3,13 @@ Module to test small_small_hr models
 """
 import os
 from datetime import datetime, timedelta
+from unittest.mock import patch
 
+import pytz
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase, override_settings
-
-import pytz
 from model_mommy import mommy
 
 from small_small_hr.forms import (AnnualLeaveForm, ApplyLeaveForm,
@@ -100,7 +100,8 @@ class TestForms(TestCase):
         self.assertEqual('Accountant', role.name)
         self.assertEqual('Keep accounts', role.description)
 
-    def test_overtime_form_apply(self):
+    @patch('small_small_hr.forms.overtime_application_email')
+    def test_overtime_form_apply(self, mock):
         """
         Test OverTimeForm
         """
@@ -138,6 +139,7 @@ class TestForms(TestCase):
         self.assertEqual('Extra work', overtime.reason)
         self.assertEqual(OverTime.PENDING, overtime.status)
         self.assertEqual('', overtime.comments)
+        mock.assert_called_with(overtime_obj=overtime)
 
     def test_overtime_form_apply_no_overlap(self):
         """
@@ -258,7 +260,8 @@ class TestForms(TestCase):
         )
 
     @override_settings(SSHR_DEFAULT_TIME=7)
-    def test_leaveform_apply(self):
+    @patch('small_small_hr.forms.leave_application_email')
+    def test_leaveform_apply(self, mock):
         """
         Test LeaveForm apply for leave
         """
@@ -301,6 +304,7 @@ class TestForms(TestCase):
         self.assertEqual('Need a break', leave.reason)
         self.assertEqual(Leave.PENDING, leave.status)
         self.assertEqual('', leave.comments)
+        mock.assert_called_with(leave_obj=leave)
 
     @override_settings(SSHR_DEFAULT_TIME=7)
     def test_leaveform_no_overlap(self):
