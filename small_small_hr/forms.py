@@ -221,7 +221,7 @@ class ApplyOverTimeForm(OverTimeForm):
             )
         )
 
-    def save(self):
+    def save(self, commit=True):
         """
         Custom save method
         """
@@ -401,7 +401,7 @@ class ApplyLeaveForm(LeaveForm):
             )
         )
 
-    def save(self):
+    def save(self, commit=True):
         """
         Custom save method
         """
