@@ -2,7 +2,9 @@
 """
 Settings for tests
 """
-from __future__ import unicode_literals
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 INSTALLED_APPS = [
     # core django apps
@@ -12,6 +14,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     # third party
     'sorl.thumbnail',
     'private_storage',
@@ -32,6 +35,22 @@ DATABASES = {
     }
 }
 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
 TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_L10N = True
@@ -42,6 +61,8 @@ SECRET_KEY = "i love oov"
 PRIVATE_STORAGE_ROOT = '/tmp/'
 MEDIA_ROOT = '/tmp/'
 PRIVATE_STORAGE_AUTH_FUNCTION = 'private_storage.permissions.allow_staff'
+
+SITE_ID = 1
 
 # try and load local_settings if present
 try:
