@@ -4,10 +4,11 @@ Module to test small_small_hr Emails
 from datetime import datetime
 from unittest.mock import patch
 
-import pytz
 from django.conf import settings
 from django.core import mail
 from django.test import TestCase, override_settings
+
+import pytz
 from model_mommy import mommy
 
 from small_small_hr.emails import (leave_application_email,
