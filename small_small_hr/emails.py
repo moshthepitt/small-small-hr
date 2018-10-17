@@ -13,7 +13,7 @@ def send_email(
     """
     Sends a generic email
     """
-    c = {
+    context = {
         'name': name,
         'subject': subject,
         'message': message,
@@ -22,11 +22,12 @@ def send_email(
     }
     email_subject = render_to_string(
         'small_small_hr/email/generic_email_subject.txt',
-        c).replace('\n', '')
+        context).replace('\n', '')
     email_txt_body = render_to_string(
-        'small_small_hr/email/generic_email_body.txt', c)
+        'small_small_hr/email/generic_email_body.txt', context)
     email_html_body = render_to_string(
-        'small_small_hr/email/generic_email_body.html', c).replace('\n', '')
+        'small_small_hr/email/generic_email_body.html', context
+        ).replace('\n', '')
 
     subject = email_subject
     from_email = settings.DEFAULT_FROM_EMAIL
@@ -56,7 +57,7 @@ def leave_application_email(leave_obj: object):
         settings, 'HR_ADMIN_EMAILS', [settings.DEFAULT_FROM_EMAIL])
 
     for admin_email in admin_emails:
-        return send_email(
+        send_email(
             name=leave_obj.staff.get_name(),
             email=admin_email,
             subject=subj,
@@ -79,7 +80,7 @@ def leave_processed_email(leave_obj: object):
             settings, 'HR_LEAVE_PROCESSED_EMAIL_SUBJ',
             _("Your leave application has been processed"))
 
-        return send_email(
+        send_email(
             name=leave_obj.staff.get_name(),
             email=leave_obj.staff.user.email,
             subject=subj,
@@ -105,7 +106,7 @@ def overtime_application_email(overtime_obj: object):
         settings, 'HR_ADMIN_EMAILS', [settings.DEFAULT_FROM_EMAIL])
 
     for admin_email in admin_emails:
-        return send_email(
+        send_email(
             name=overtime_obj.staff.get_name(),
             email=admin_email,
             subject=subj,
@@ -129,7 +130,7 @@ def overtime_processed_email(overtime_obj: object):
             settings, 'HR_OVERTIME_PROCESSED_EMAIL_SUBJ',
             _("Your overtime application has been processed"))
 
-        return send_email(
+        send_email(
             name=overtime_obj.staff.get_name(),
             email=overtime_obj.staff.user.email,
             subject=subj,
