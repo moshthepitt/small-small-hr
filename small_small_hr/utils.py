@@ -5,8 +5,6 @@ from django.conf import settings
 
 from small_small_hr.models import AnnualLeave, Leave
 
-MAX_CARRY_OVER = getattr(settings, 'SSHR_MAX_CARRY_OVER', 10)
-
 
 def get_carry_over(staffprofile: object, year: int, leave_type: str):
     """
@@ -15,10 +13,10 @@ def get_carry_over(staffprofile: object, year: int, leave_type: str):
     # pylint: disable=no-member
     if leave_type == Leave.REGULAR:
         previous_obj = AnnualLeave.objects.filter(
-            staff=staffprofile, year=year-1, leave_type=leave_type).first()
+            staff=staffprofile, year=year - 1, leave_type=leave_type).first()
         if previous_obj:
             remaining = previous_obj.get_available_leave_days()
-            max_carry_over = MAX_CARRY_OVER
+            max_carry_over = settings.SSHR_MAX_CARRY_OVER
             if remaining > max_carry_over:
                 carry_over = max_carry_over
             else:

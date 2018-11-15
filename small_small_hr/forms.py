@@ -315,7 +315,7 @@ class LeaveForm(forms.ModelForm):
                 self.add_error('end', msg)
 
             # end must be later than start
-            if end <= start:
+            if end < start:
                 self.add_error('end', _("end must be greater than start"))
 
             # staff profile must have sufficient sick days

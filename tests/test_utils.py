@@ -3,10 +3,9 @@ Module to test small_small_hr Signals
 """
 from datetime import datetime
 
-from django.conf import settings
-from django.test import TestCase
-
 import pytz
+from django.conf import settings
+from django.test import TestCase, override_settings
 from model_mommy import mommy
 
 from small_small_hr.models import Leave, StaffProfile
@@ -18,6 +17,18 @@ class TestUtils(TestCase):
     Test class for utils
     """
 
+    @override_settings(
+        SSHR_MAX_CARRY_OVER=10,
+        SSHR_DAY_LEAVE_VALUES={
+            1: 1,  # Monday
+            2: 1,  # Tuesday
+            3: 1,  # Wednesday
+            4: 1,  # Thursday
+            5: 1,  # Friday
+            6: 0,  # Saturday
+            7: 0,  # Sunday
+        }
+    )
     def test_get_carry_over(self):
         """
         Test get_carry_over
@@ -31,38 +42,49 @@ class TestUtils(TestCase):
             get_carry_over(staffprofile, 2017, Leave.REGULAR)
         )
 
-        create_annual_leave(staffprofile, 2016, Leave.REGULAR)
+        create_annual_leave(staffprofile, 2017, Leave.REGULAR)
 
         # carry over should be 10 because the balance is 21
         self.assertEqual(
             10,
-            get_carry_over(staffprofile, 2017, Leave.REGULAR)
+            get_carry_over(staffprofile, 2018, Leave.REGULAR)
         )
 
-        # 12 days of leave
+        # 12 days of leave, Sat & Sun not counted
         start = datetime(
-            2016, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
         end = datetime(
-            2016, 6, 16, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+            2017, 6, 20, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
 
         mommy.make('small_small_hr.Leave', leave_type=Leave.REGULAR,
                    start=start, end=end, status=Leave.APPROVED,
                    staff=staffprofile)
 
-        # carry over should be 9 => 21-12
+        # carry over should be 9 => 21-12 
         self.assertEqual(
             9,
-            get_carry_over(staffprofile, 2017, Leave.REGULAR)
+            get_carry_over(staffprofile, 2018, Leave.REGULAR)
         )
 
         # no sick leave carry over
-        create_annual_leave(staffprofile, 2016, Leave.SICK)
+        create_annual_leave(staffprofile, 2017, Leave.SICK)
 
         self.assertEqual(
             0,
-            get_carry_over(staffprofile, 2017, Leave.SICK)
+            get_carry_over(staffprofile, 2018, Leave.SICK)
         )
 
+    @override_settings(
+        SSHR_DAY_LEAVE_VALUES={
+            1: 1,  # Monday
+            2: 1,  # Tuesday
+            3: 1,  # Wednesday
+            4: 1,  # Thursday
+            5: 1,  # Friday
+            6: 1,  # Saturday
+            7: 1,  # Sunday
+        }
+    )
     def test_create_annual_leave(self):
         """
         Test create_annual_leave

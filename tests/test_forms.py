@@ -307,6 +307,53 @@ class TestForms(TestCase):
         mock.assert_called_with(leave_obj=leave)
 
     @override_settings(SSHR_DEFAULT_TIME=7)
+    @patch('small_small_hr.forms.leave_application_email')
+    def test_one_day_leave(self, mock):
+        """
+        Test application for one day leave
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
+        staffprofile.leave_days = 21
+        staffprofile.sick_days = 10
+        staffprofile.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        # 6 days of leave
+        start = datetime(
+            2017, 6, 5, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 5, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
+                   leave_type=Leave.REGULAR, carried_over_days=12)
+
+        data = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.REGULAR,
+            'start': start,
+            'end': end,
+            'reason': 'Need a break',
+        }
+
+        form = ApplyLeaveForm(data=data)
+        self.assertTrue(form.is_valid())
+        leave = form.save()
+        self.assertEqual(staffprofile, leave.staff)
+        self.assertEqual(Leave.REGULAR, leave.leave_type)
+        self.assertEqual(start, leave.start)
+        self.assertEqual(end, leave.end)
+        self.assertEqual(
+            timedelta(days=0).days, (leave.end - leave.start).days)
+        self.assertEqual('Need a break', leave.reason)
+        self.assertEqual(Leave.PENDING, leave.status)
+        self.assertEqual('', leave.comments)
+        mock.assert_called_with(leave_obj=leave)
+
+    @override_settings(SSHR_DEFAULT_TIME=7)
     def test_leaveform_no_overlap(self):
         """
         Test LeaveForm no overlap
