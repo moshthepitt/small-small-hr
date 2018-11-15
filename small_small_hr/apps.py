@@ -13,7 +13,7 @@ class SmallSmallHrConfig(AppConfig):
 
     def ready(self):
         # pylint: disable=unused-variable
-        import small_small_hr.signals  # noqa        
+        import small_small_hr.signals  # noqa
 
         # set up app settings
         from django.conf import settings
