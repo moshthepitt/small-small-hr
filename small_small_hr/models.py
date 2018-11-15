@@ -372,20 +372,14 @@ class AnnualLeave(TimeStampedModel, models.Model):
 
         Returns a timedelta
         """
-        # we add one day to make end and start inclusive
-        leave_queryset = Leave.objects.filter(
-            staff=self.staff,
+        from small_small_hr.utils import get_taken_leave_days
+        return get_taken_leave_days(
+            staffprofile=self.staff,
             status=Leave.APPROVED,
             leave_type=self.leave_type,
-            start__year=self.year,
-            end__year=self.year).annotate(
-                duration=models.ExpressionWrapper(
-                    models.F('end') - models.F('start') + timedelta(days=1),
-                    output_field=models.DurationField()))
-
-        return leave_queryset.aggregate(
-            leave=Coalesce(Sum('duration'),
-                           V(timedelta(days=0))))['leave']
+            start_year=self.year,
+            end_year=self.year
+        )
 
     def get_available_leave_days(self, month: int = 12):
         """
@@ -406,7 +400,7 @@ class AnnualLeave(TimeStampedModel, models.Model):
         earned = Decimal(month) * per_month
 
         # the days taken
-        taken = self.get_cumulative_leave_taken().days
+        taken = self.get_cumulative_leave_taken()
 
         # the starting balance
         starting_balance = self.carried_over_days
