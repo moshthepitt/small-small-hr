@@ -7,9 +7,8 @@ from decimal import Decimal
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
-from django.db.models import Sum
-from django.db.models import Value as V
-from django.db.models.functions import Coalesce
+from django.db.models import Q
+from django.utils import timezone
 from django.utils.translation import ugettext as _
 
 from phonenumber_field.modelfields import PhoneNumberField
@@ -134,30 +133,25 @@ class StaffProfile(TimeStampedModel, models.Model):
         Get approved leave days in the current year
         """
         # pylint: disable=no-member
-        queryset = self.leave_set.filter(
+        return get_taken_leave_days(
+            staffprofile=self,
             status=Leave.APPROVED,
             leave_type=Leave.REGULAR,
-            start__year=year,
-            end__year=year).annotate(
-                duration=models.F('end')-models.F('start'))
-        return queryset.aggregate(
-            leave=Coalesce(Sum('duration'),
-                           V(timedelta(days=0))))['leave']
+            start_year=year,
+            end_year=year
+        )
 
     def get_approved_sick_days(self, year: int = datetime.today().year):
         """
         Get approved leave days in the current year
         """
-        # pylint: disable=no-member
-        queryset = self.leave_set.filter(
+        return get_taken_leave_days(
+            staffprofile=self,
             status=Leave.APPROVED,
             leave_type=Leave.SICK,
-            start__year=year,
-            end__year=year).annotate(
-                duration=models.F('end')-models.F('start'))
-        return queryset.aggregate(
-            leave=Coalesce(Sum('duration'),
-                           V(timedelta(days=0))))['leave']
+            start_year=year,
+            end_year=year
+        )
 
     def get_available_leave_days(self, year: int = datetime.today().year):
         """
@@ -372,7 +366,6 @@ class AnnualLeave(TimeStampedModel, models.Model):
 
         Returns a timedelta
         """
-        from small_small_hr.utils import get_taken_leave_days
         return get_taken_leave_days(
             staffprofile=self.staff,
             status=Leave.APPROVED,
@@ -406,3 +399,40 @@ class AnnualLeave(TimeStampedModel, models.Model):
         starting_balance = self.carried_over_days
 
         return Decimal(earned + starting_balance - taken)
+
+
+def get_days(start: object, end: object):
+    """
+    Yield the days between two datetime objects
+    """
+    current_tz = timezone.get_current_timezone()
+    local_start = current_tz.normalize(start)
+    local_end = current_tz.normalize(end)
+    span = local_end.date() - local_start.date()
+    for i in range(span.days + 1):
+        yield local_start.date() + timedelta(days=i)
+
+
+def get_taken_leave_days(
+        staffprofile: object,
+        status: str,
+        leave_type: str,
+        start_year: int,
+        end_year: int):
+    """
+    Calculate the number of leave days actually taken,
+    taking into account weekends and weekend policy
+    """
+    count = Decimal(0)
+    queryset = Leave.objects.filter(
+        staff=staffprofile,
+        status=status,
+        leave_type=leave_type).filter(
+            Q(start__year__gte=start_year) | Q(end__year__lte=end_year))
+    for leave_obj in queryset:
+        days = get_days(start=leave_obj.start, end=leave_obj.end)
+        for day in days:
+            if day.year >= start_year and day.year <= end_year:
+                day_value = settings.SSHR_DAY_LEAVE_VALUES[day.isoweekday()]
+                count = count + Decimal(day_value)
+    return count

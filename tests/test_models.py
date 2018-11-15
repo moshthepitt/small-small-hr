@@ -10,7 +10,7 @@ from django.utils import timezone
 import pytz
 from model_mommy import mommy
 
-from small_small_hr.models import Leave
+from small_small_hr.models import Leave, get_taken_leave_days
 
 
 class TestModels(TestCase):
@@ -202,8 +202,8 @@ class TestModels(TestCase):
             3: 1,  # Wednesday
             4: 1,  # Thursday
             5: 1,  # Friday
-            6: 0,  # Saturday
-            7: 0,  # Sunday
+            6: 1,  # Saturday
+            7: 1,  # Sunday
         }
     )
     def test_get_approved_leave_days(self):
@@ -224,8 +224,8 @@ class TestModels(TestCase):
             start=start + timedelta(days=10),
             end=start + timedelta(days=14), leave_type=Leave.REGULAR,
             status=Leave.APPROVED)
-        self.assertEqual(timedelta(days=10).days,
-                         staff.get_approved_leave_days(year=start.year).days)
+        self.assertEqual(timedelta(days=12).days,
+                         staff.get_approved_leave_days(year=start.year))
 
     @override_settings(
         SSHR_DAY_LEAVE_VALUES={
@@ -257,7 +257,7 @@ class TestModels(TestCase):
             end=start + timedelta(days=15),
             leave_type=Leave.SICK, status=Leave.APPROVED)
         self.assertEqual(timedelta(days=9).days,
-                         staff.get_approved_sick_days(year=start.year).days)
+                         staff.get_approved_sick_days(year=start.year))
 
     @override_settings(
         SSHR_DAY_LEAVE_VALUES={
@@ -295,6 +295,44 @@ class TestModels(TestCase):
 
         # remaining should be 21 - 10
         self.assertEqual(21 - 10, staff.get_available_leave_days(year=2017))
+
+    @override_settings(
+        SSHR_DAY_LEAVE_VALUES={
+            1: 1,  # Monday
+            2: 1,  # Tuesday
+            3: 1,  # Wednesday
+            4: 1,  # Thursday
+            5: 1,  # Friday
+            6: 0,  # Saturday
+            7: 0,  # Sunday
+        }
+    )
+    def test_one_leave_day(self):
+        """
+        Test one leave day
+        """
+        user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
+        mommy.make('small_small_hr.AnnualLeave', staff=staff, year=2017,
+                   leave_type=Leave.REGULAR, allowed_days=21)
+        
+        # ONE DAY of leave because Saturday and Sunday are not counted
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        # add some approved leave days
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=end, leave_type=Leave.REGULAR,
+            status=Leave.APPROVED)
+
+        staff.refresh_from_db()
+
+        # remaining should be 21 - 10
+        self.assertEqual(1, staff.get_approved_leave_days(year=2017))
+        self.assertEqual(20, staff.get_available_leave_days(year=2017))
 
     @override_settings(
         SSHR_DAY_LEAVE_VALUES={
@@ -399,3 +437,81 @@ class TestModels(TestCase):
                 'small_small_hr.OverTime', date=now.date(),
                 start=now.time(), end=end.time(),
                 staff=staff).get_duration().seconds)
+
+    @override_settings(
+        SSHR_DAY_LEAVE_VALUES={
+            1: 1,  # Monday
+            2: 1,  # Tuesday
+            3: 1,  # Wednesday
+            4: 1,  # Thursday
+            5: 1,  # Friday
+            6: 0,  # Saturday
+            7: 0,  # Sunday
+        }
+    )
+    def test_get_taken_leave_days(self):
+        """
+        Test get_taken_leave_days
+        """
+        user = mommy.make('auth.User', first_name='Mosh', last_name='Pitt')
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
+
+        # 10 days of leave because Saturday and Sunday are not counted
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 16, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        # add some approved leave days
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=end, leave_type=Leave.REGULAR,
+            status=Leave.APPROVED)
+
+        leave_days = get_taken_leave_days(
+            staffprofile=staff,
+            status=Leave.APPROVED,
+            leave_type=Leave.REGULAR,
+            start_year=2017,
+            end_year=2017)
+
+        self.assertEqual(10, leave_days)
+
+    @override_settings(
+        SSHR_DAY_LEAVE_VALUES={
+            1: 1,  # Monday
+            2: 1,  # Tuesday
+            3: 1,  # Wednesday
+            4: 1,  # Thursday
+            5: 1,  # Friday
+            6: 0.5,  # Saturday
+            7: 0,  # Sunday
+        }
+    )
+    def test_get_taken_leave_days_half_saturday(self):
+        """
+        Test get_taken_leave_days
+        """
+        user = mommy.make('auth.User', first_name='Kel', last_name='Vin')
+        staff = mommy.make('small_small_hr.StaffProfile', user=user)
+
+        # 10.5 days of leave because Saturday==0.5 and Sunday not counted
+        start = datetime(
+            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 16, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        # add some approved leave days
+        mommy.make(
+            'small_small_hr.Leave', staff=staff, start=start,
+            end=end, leave_type=Leave.REGULAR,
+            status=Leave.APPROVED)
+
+        leave_days = get_taken_leave_days(
+            staffprofile=staff,
+            status=Leave.APPROVED,
+            leave_type=Leave.REGULAR,
+            start_year=2017,
+            end_year=2017)
+
+        self.assertEqual(10.5, leave_days)
