@@ -13,4 +13,11 @@ class SmallSmallHrConfig(AppConfig):
 
     def ready(self):
         # pylint: disable=unused-variable
-        import small_small_hr.signals  # noqa
+        import small_small_hr.signals  # noqa        
+
+        # set up app settings
+        from django.conf import settings
+        import small_small_hr.settings as defaults
+        for name in dir(defaults):
+            if name.isupper() and not hasattr(settings, name):
+                setattr(settings, name, getattr(defaults, name))
