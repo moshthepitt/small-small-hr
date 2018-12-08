@@ -11,3 +11,5 @@ SSHR_DAY_LEAVE_VALUES = {
     6: 0,  # Saturday
     7: 0,  # Sunday
 }
+SSHR_ALLOW_OVERSUBSCRIBE = True  # allow taking more leave days one has
+SSHR_DEFAULT_TIME = 7  # default time of the day for leave
