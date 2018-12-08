@@ -411,6 +411,7 @@ class FreeDay(models.Model):
     class Meta:
         """Meta definition for FreeDay."""
         ordering = ['-year', 'date']
+        unique_together = (('year', 'date'),)
         verbose_name = _('Free Day')
         verbose_name_plural = _('Free Days')
 
