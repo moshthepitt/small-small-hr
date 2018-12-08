@@ -76,7 +76,7 @@ def create_free_days(
                 day=default_day['day'],
             )
             free_day = FreeDay(
-                name=the_date.strftime("%d %B %Y"),
+                name=the_date.strftime("%A %d %B %Y"),
                 date=the_date,
             )
             free_day.save()
