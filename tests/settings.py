@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'rest_framework',
     # custom
-    'small_small_hr.apps.SmallSmallHrConfig',
+    'small_small_hr',
 ]
 
 DATABASES = {
