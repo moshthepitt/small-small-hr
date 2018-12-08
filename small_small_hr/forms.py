@@ -22,9 +22,6 @@ from small_small_hr.models import (TWOPLACES, Leave, OverTime, Role,
                                    StaffDocument, StaffProfile, AnnualLeave)
 
 
-DEFAULT_TIME = getattr(settings, 'SSHR_DEFAULT_TIME', 7)
-
-
 class AnnualLeaveForm(forms.ModelForm):
     """
     Form used when managing AnnualLeave
@@ -282,7 +279,7 @@ class LeaveForm(forms.ModelForm):
         data = self.cleaned_data['start']
         data = datetime.combine(
             date=data,
-            time=time(DEFAULT_TIME, 0, 0, 0),
+            time=time(settings.SSHR_DEFAULT_TIME, 0, 0, 0),
             tzinfo=pytz.timezone(settings.TIME_ZONE))
         return data
 
@@ -293,7 +290,7 @@ class LeaveForm(forms.ModelForm):
         data = self.cleaned_data['end']
         data = datetime.combine(
             date=data,
-            time=time(DEFAULT_TIME, 0, 0, 0),
+            time=time(settings.SSHR_DEFAULT_TIME, 0, 0, 0),
             tzinfo=pytz.timezone(settings.TIME_ZONE))
         return data
 
@@ -318,23 +315,25 @@ class LeaveForm(forms.ModelForm):
             if end < start:
                 self.add_error('end', _("end must be greater than start"))
 
-            # staff profile must have sufficient sick days
-            if leave_type == Leave.SICK:
-                sick_days = staff.get_available_sick_days(year=start.year)
-                if (end - start).days > sick_days:
-                    msg = _('Not enough sick days. Available sick days '
-                            f'are {sick_days.quantize(TWOPLACES)}')
-                    self.add_error('start', msg)
-                    self.add_error('end', msg)
+            if not settings.SSHR_ALLOW_OVERSUBSCRIBE:
+                # staff profile must have sufficient sick days
+                if leave_type == Leave.SICK:
+                    sick_days = staff.get_available_sick_days(year=start.year)
+                    if (end - start).days > sick_days:
+                        msg = _('Not enough sick days. Available sick days '
+                                f'are {sick_days.quantize(TWOPLACES)}')
+                        self.add_error('start', msg)
+                        self.add_error('end', msg)
 
-            # staff profile must have sufficient leave days
-            if leave_type == Leave.REGULAR:
-                leave_days = staff.get_available_leave_days(year=start.year)
-                if (end - start).days > leave_days:
-                    msg = _('Not enough leave days. Available leave days '
-                            f'are {leave_days.quantize(TWOPLACES)}')
-                    self.add_error('start', msg)
-                    self.add_error('end', msg)
+                # staff profile must have sufficient leave days
+                if leave_type == Leave.REGULAR:
+                    leave_days = staff.get_available_leave_days(
+                        year=start.year)
+                    if (end - start).days > leave_days:
+                        msg = _('Not enough leave days. Available leave days '
+                                f'are {leave_days.quantize(TWOPLACES)}')
+                        self.add_error('start', msg)
+                        self.add_error('end', msg)
 
             # must not overlap
             # pylint: disable=no-member
