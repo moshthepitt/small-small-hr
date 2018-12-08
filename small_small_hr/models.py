@@ -219,7 +219,7 @@ class StaffDocument(TimeStampedModel, models.Model):
         abstract = False
         verbose_name = _('Staff Document')
         verbose_name_plural = _('Staff Documents')
-        ordering = ['staff', 'name', 'created']
+        ordering = ['staff', 'name', '-created']
 
     def __str__(self):
         # pylint: disable=no-member
@@ -282,7 +282,7 @@ class Leave(BaseStaffRequest):
         abstract = False
         verbose_name = _('Leave')
         verbose_name_plural = _('Leave')
-        ordering = ['staff', 'start']
+        ordering = ['staff', '-start']
 
     def __str__(self):
         # pylint: disable=no-member
@@ -305,7 +305,7 @@ class OverTime(BaseStaffRequest):
         abstract = False
         verbose_name = _('Overtime')
         verbose_name_plural = _('Overtime')
-        ordering = ['staff', 'date', 'start']
+        ordering = ['staff', '-date', 'start']
 
     def __str__(self):
         name = self.staff.get_name()  # pylint: disable=no-member
@@ -328,7 +328,7 @@ class AnnualLeave(TimeStampedModel, models.Model):
     Each staff member can only have one record per leave_type per year
     """
     YEAR_CHOICES = [
-        (r, r) for r in range(2017, datetime.today().year + 5)
+        (r, r) for r in range(2017, datetime.today().year + 10)
     ]
 
     year = models.PositiveIntegerField(
@@ -351,7 +351,7 @@ class AnnualLeave(TimeStampedModel, models.Model):
         """
         verbose_name = _('Annual Leave')
         verbose_name_plural = _('Annual Leave')
-        ordering = ['year', 'leave_type', 'staff']
+        ordering = ['-year', 'leave_type', 'staff']
         unique_together = (('year', 'staff', 'leave_type'),)
 
     def __str__(self):
@@ -399,6 +399,24 @@ class AnnualLeave(TimeStampedModel, models.Model):
         starting_balance = self.carried_over_days
 
         return Decimal(earned + starting_balance - taken)
+
+
+class FreeDay(models.Model):
+    """Model definition for FreeDay."""
+    year = models.PositiveIntegerField(
+        _('Year'), choices=AnnualLeave.YEAR_CHOICES,
+        default=datetime.today().year, db_index=True)
+    date = models.DateField('Date')
+
+    class Meta:
+        """Meta definition for FreeDay."""
+        ordering = ['-year', 'date']
+        verbose_name = _('Free Day')
+        verbose_name_plural = _('Free Days')
+
+    def __str__(self):
+        """Unicode representation of FreeDay."""
+        return f"{self.year} - {self.date}"
 
 
 def get_days(start: object, end: object):
