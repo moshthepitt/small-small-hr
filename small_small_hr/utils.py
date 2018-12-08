@@ -1,9 +1,12 @@
 """
 Utils module for small small hr
 """
-from django.conf import settings
+from datetime import date
 
-from small_small_hr.models import AnnualLeave, Leave
+from django.conf import settings
+from django.utils import timezone
+
+from small_small_hr.models import AnnualLeave, FreeDay, Leave
 
 
 def get_carry_over(staffprofile: object, year: int, leave_type: str):
@@ -53,3 +56,27 @@ def create_annual_leave(staffprofile: object, year: int, leave_type: str):
         annual_leave.save()
 
     return annual_leave
+
+
+def create_free_days(
+        start_year: int = timezone.now().year, number_of_years: int = 11):
+    """
+    Create FreeDay records
+
+    :param start_year:  the year from which to start creating free days
+    :param number_of_years: number of years to create free days objects
+    """
+    default_days = settings.SSHR_FREE_DAYS
+    years = (start_year + _ for _ in range(number_of_years))
+    for year in years:
+        for default_day in default_days:
+            the_date = date(
+                year=year,
+                month=default_day['month'],
+                day=default_day['day'],
+            )
+            free_day = FreeDay(
+                name=the_date.strftime("%d %B %Y"),
+                date=the_date,
+            )
+            free_day.save()

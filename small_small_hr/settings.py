@@ -19,6 +19,6 @@ SSHR_FREE_DAYS = [
     {'day': 1, 'month': 6},  # Madaraka day
     {'day': 20, 'month': 10},  # Mashujaa day
     {'day': 12, 'month': 12},  # Jamhuri day
-    {'day': 25, 'month': 12},  # Christmass
+    {'day': 25, 'month': 12},  # Christmas
     {'day': 26, 'month': 12},  # Boxing day
 ]  # these are days that are not counted when getting taken leave days
