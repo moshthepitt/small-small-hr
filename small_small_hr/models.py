@@ -403,21 +403,18 @@ class AnnualLeave(TimeStampedModel, models.Model):
 
 class FreeDay(models.Model):
     """Model definition for FreeDay."""
-    year = models.PositiveIntegerField(
-        _('Year'), choices=AnnualLeave.YEAR_CHOICES,
-        default=datetime.today().year, db_index=True)
-    date = models.DateField('Date')
+    name = models.CharField(_("Name"), max_length=255)
+    date = models.DateField(_('Date'), unique=True)
 
     class Meta:
         """Meta definition for FreeDay."""
-        ordering = ['-year', 'date']
-        unique_together = (('year', 'date'),)
+        ordering = ['-date']
         verbose_name = _('Free Day')
         verbose_name_plural = _('Free Days')
 
     def __str__(self):
         """Unicode representation of FreeDay."""
-        return f"{self.year} - {self.date}"
+        return f"{self.date.year} - {self.name}"
 
 
 def get_days(start: object, end: object):
