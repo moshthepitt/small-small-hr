@@ -4,22 +4,22 @@ Forms module for small small hr
 from datetime import datetime, time
 
 from django import forms
-from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.utils.translation import ugettext as _
 
 import pytz
 from crispy_forms.bootstrap import Field, FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
-from phonenumber_field.phonenumber import PhoneNumber
 from phonenumber_field.formfields import PhoneNumberField
+from phonenumber_field.phonenumber import PhoneNumber
 
 from small_small_hr.emails import (leave_application_email,
                                    overtime_application_email)
-from small_small_hr.models import (TWOPLACES, Leave, OverTime, Role,
-                                   StaffDocument, StaffProfile, AnnualLeave)
+from small_small_hr.models import (TWOPLACES, AnnualLeave, FreeDay, Leave,
+                                   OverTime, Role, StaffDocument, StaffProfile)
 
 
 class AnnualLeaveForm(forms.ModelForm):
@@ -90,6 +90,40 @@ class RoleForm(forms.ModelForm):
         self.helper.layout = Layout(
             Field('name',),
             Field('description',),
+            FormActions(
+                Submit('submitBtn', _('Submit'), css_class='btn-primary'),
+            )
+        )
+
+
+class FreeDayForm(forms.ModelForm):
+    """
+    Form used when managing FreeDay objects
+    """
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """
+        Class meta options
+        """
+        model = FreeDay
+        fields = [
+            'name',
+            'date'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = True
+        self.helper.form_method = 'post'
+        self.helper.render_required_fields = True
+        self.helper.form_show_labels = True
+        self.helper.html5_required = True
+        self.helper.form_id = 'freeday-form'
+        self.helper.layout = Layout(
+            Field('name',),
+            Field('date',),
             FormActions(
                 Submit('submitBtn', _('Submit'), css_class='btn-primary'),
             )

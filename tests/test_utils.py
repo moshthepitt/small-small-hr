@@ -8,8 +8,9 @@ from django.conf import settings
 from django.test import TestCase, override_settings
 from model_mommy import mommy
 
-from small_small_hr.models import Leave, StaffProfile
-from small_small_hr.utils import create_annual_leave, get_carry_over
+from small_small_hr.models import Leave, StaffProfile, FreeDay
+from small_small_hr.utils import (create_annual_leave, create_free_days,
+                                  get_carry_over)
 
 
 class TestUtils(TestCase):
@@ -60,7 +61,7 @@ class TestUtils(TestCase):
                    start=start, end=end, status=Leave.APPROVED,
                    staff=staffprofile)
 
-        # carry over should be 9 => 21-12 
+        # carry over should be 9 => 21 - 12
         self.assertEqual(
             9,
             get_carry_over(staffprofile, 2018, Leave.REGULAR)
@@ -124,3 +125,64 @@ class TestUtils(TestCase):
         self.assertEqual(0, obj3.carried_over_days)
         self.assertEqual(10, obj3.allowed_days)
         self.assertEqual(Leave.SICK, obj3.leave_type)
+
+    @override_settings(
+        SSHR_FREE_DAYS=[
+            {'day': 1, 'month': 1},  # New year
+            {'day': 1, 'month': 5},  # labour day
+            {'day': 1, 'month': 6},  # Madaraka day
+            {'day': 20, 'month': 10},  # Mashujaa day
+            {'day': 12, 'month': 12},  # Jamhuri day
+            {'day': 25, 'month': 12},  # Christmas
+            {'day': 26, 'month': 12},  # Boxing day
+        ]
+    )
+    def test_create_free_days(self):
+        """
+        Test create_free_days
+        """
+        FreeDay.objects.all().delete()
+        create_free_days(start_year=2014, number_of_years=2)
+        self.assertEqual(14, FreeDay.objects.count())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2014, date__day=1, date__month=1).exists())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2014, date__day=1, date__month=5).exists())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2014, date__day=1, date__month=6).exists())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2014, date__day=20, date__month=10).exists())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2014, date__day=12, date__month=12).exists())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2014, date__day=25, date__month=12).exists())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2014, date__day=26, date__month=12).exists())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2015, date__day=1, date__month=1).exists())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2015, date__day=1, date__month=5).exists())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2015, date__day=1, date__month=6).exists())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2015, date__day=20, date__month=10).exists())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2015, date__day=12, date__month=12).exists())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2015, date__day=25, date__month=12).exists())
+        self.assertTrue(
+            FreeDay.objects.filter(
+                date__year=2015, date__day=26, date__month=12).exists())

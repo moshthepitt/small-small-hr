@@ -219,7 +219,7 @@ class StaffDocument(TimeStampedModel, models.Model):
         abstract = False
         verbose_name = _('Staff Document')
         verbose_name_plural = _('Staff Documents')
-        ordering = ['staff', 'name', 'created']
+        ordering = ['staff', 'name', '-created']
 
     def __str__(self):
         # pylint: disable=no-member
@@ -282,7 +282,7 @@ class Leave(BaseStaffRequest):
         abstract = False
         verbose_name = _('Leave')
         verbose_name_plural = _('Leave')
-        ordering = ['staff', 'start']
+        ordering = ['staff', '-start']
 
     def __str__(self):
         # pylint: disable=no-member
@@ -305,7 +305,7 @@ class OverTime(BaseStaffRequest):
         abstract = False
         verbose_name = _('Overtime')
         verbose_name_plural = _('Overtime')
-        ordering = ['staff', 'date', 'start']
+        ordering = ['staff', '-date', 'start']
 
     def __str__(self):
         name = self.staff.get_name()  # pylint: disable=no-member
@@ -328,7 +328,7 @@ class AnnualLeave(TimeStampedModel, models.Model):
     Each staff member can only have one record per leave_type per year
     """
     YEAR_CHOICES = [
-        (r, r) for r in range(2017, datetime.today().year + 5)
+        (r, r) for r in range(2017, datetime.today().year + 10)
     ]
 
     year = models.PositiveIntegerField(
@@ -351,7 +351,7 @@ class AnnualLeave(TimeStampedModel, models.Model):
         """
         verbose_name = _('Annual Leave')
         verbose_name_plural = _('Annual Leave')
-        ordering = ['year', 'leave_type', 'staff']
+        ordering = ['-year', 'leave_type', 'staff']
         unique_together = (('year', 'staff', 'leave_type'),)
 
     def __str__(self):
@@ -401,6 +401,22 @@ class AnnualLeave(TimeStampedModel, models.Model):
         return Decimal(earned + starting_balance - taken)
 
 
+class FreeDay(models.Model):
+    """Model definition for FreeDay."""
+    name = models.CharField(_("Name"), max_length=255)
+    date = models.DateField(_('Date'), unique=True)
+
+    class Meta:
+        """Meta definition for FreeDay."""
+        ordering = ['-date']
+        verbose_name = _('Free Day')
+        verbose_name_plural = _('Free Days')
+
+    def __str__(self):
+        """Unicode representation of FreeDay."""
+        return f"{self.date.year} - {self.name}"
+
+
 def get_days(start: object, end: object):
     """
     Yield the days between two datetime objects
@@ -424,6 +440,9 @@ def get_taken_leave_days(
     taking into account weekends and weekend policy
     """
     count = Decimal(0)
+    free_days = FreeDay.objects.filter(
+        date__year__gte=start_year, date__year__lte=end_year
+    ).values_list('date', flat=True)
     queryset = Leave.objects.filter(
         staff=staffprofile,
         status=status,
@@ -432,7 +451,8 @@ def get_taken_leave_days(
     for leave_obj in queryset:
         days = get_days(start=leave_obj.start, end=leave_obj.end)
         for day in days:
-            if day.year >= start_year and day.year <= end_year:
+            if day.year >= start_year and day.year <= end_year and\
+                    day not in free_days:
                 day_value = settings.SSHR_DAY_LEAVE_VALUES[day.isoweekday()]
                 count = count + Decimal(day_value)
     return count

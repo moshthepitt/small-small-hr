@@ -2,7 +2,7 @@
 Module to test small_small_hr models
 """
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from unittest.mock import patch
 
 import pytz
@@ -17,7 +17,7 @@ from small_small_hr.forms import (AnnualLeaveForm, ApplyLeaveForm,
                                   RoleForm, StaffDocumentForm,
                                   StaffProfileAdminCreateForm,
                                   StaffProfileAdminForm, StaffProfileUserForm,
-                                  UserStaffDocumentForm)
+                                  UserStaffDocumentForm, FreeDayForm)
 from small_small_hr.models import (Leave, OverTime, StaffProfile,
                                    get_taken_leave_days)
 from small_small_hr.serializers import StaffProfileSerializer
@@ -100,6 +100,34 @@ class TestForms(TestCase):
         role = form.save()
         self.assertEqual('Accountant', role.name)
         self.assertEqual('Keep accounts', role.description)
+
+    def test_freeday_form(self):
+        """
+        Test FreeDayForm
+        """
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        data = {
+            'name': 'Mosh Day',
+            'date': '1/1/2017'
+        }
+
+        form = FreeDayForm(data=data)
+        self.assertTrue(form.is_valid())
+        free_day = form.save()
+        self.assertEqual('Mosh Day', free_day.name)
+        self.assertEqual(date(2017, 1, 1), free_day.date)
+
+        # has to be unique
+        form2 = FreeDayForm(data=data)
+        self.assertFalse(form2.is_valid())
+        self.assertEqual(1, len(form2.errors.keys()))
+        self.assertEqual(
+            'Free Day with this Date already exists.',
+            form2.errors['date'][0]
+        )
 
     @patch('small_small_hr.forms.overtime_application_email')
     def test_overtime_form_apply(self, mock):
