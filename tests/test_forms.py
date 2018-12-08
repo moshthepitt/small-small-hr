@@ -785,6 +785,7 @@ class TestForms(TestCase):
             form2.errors['end'][0]
         )
 
+    @override_settings(SSHR_ALLOW_OVERSUBSCRIBE=False)
     def test_leaveform_max_days(self):
         """
         Test leave days sufficient
@@ -828,6 +829,7 @@ class TestForms(TestCase):
             form.errors['end'][0]
         )
 
+    @override_settings(SSHR_ALLOW_OVERSUBSCRIBE=False)
     def test_leaveform_max_sick_days(self):
         """
         Test sick days sufficient
