@@ -378,6 +378,63 @@ class TestForms(TestCase):
         )
         self.assertEqual(-19, staffprofile.get_available_leave_days(year=2017))
 
+    @override_settings(
+        SSHR_DEFAULT_TIME=7,
+        SSHR_ALLOW_OVERSUBSCRIBE=False,
+        SSHR_DAY_LEAVE_VALUES={
+            1: 1,  # Monday
+            2: 1,  # Tuesday
+            3: 1,  # Wednesday
+            4: 1,  # Thursday
+            5: 1,  # Friday
+            6: 1,  # Saturday
+            7: 1,  # Sunday
+        }
+    )
+    @patch('small_small_hr.forms.leave_application_email')
+    def test_leave_oversubscribe_off(self, mock):
+        """
+        Test leave oversubscribe when SSHR_ALLOW_OVERSUBSCRIBE is False
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
+        staffprofile.leave_days = 21
+        staffprofile.sick_days = 10
+        staffprofile.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        # 40 days of leave
+        start = datetime(
+            2017, 6, 1, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 7, 10, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
+                   leave_type=Leave.REGULAR, carried_over_days=0)
+
+        data = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.REGULAR,
+            'start': start,
+            'end': end,
+            'reason': 'Mini retirement',
+        }
+
+        form = ApplyLeaveForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(2, len(form.errors.keys()))
+        self.assertEqual(
+            'Not enough leave days. Available leave days are 21.00',
+            form.errors['start'][0]
+        )
+        self.assertEqual(
+            'Not enough leave days. Available leave days are 21.00',
+            form.errors['end'][0]
+        )
+
     @override_settings(SSHR_DEFAULT_TIME=7)
     @patch('small_small_hr.forms.leave_application_email')
     def test_one_day_leave(self, mock):
