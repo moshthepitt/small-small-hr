@@ -18,7 +18,8 @@ from small_small_hr.forms import (AnnualLeaveForm, ApplyLeaveForm,
                                   StaffProfileAdminCreateForm,
                                   StaffProfileAdminForm, StaffProfileUserForm,
                                   UserStaffDocumentForm)
-from small_small_hr.models import Leave, OverTime, StaffProfile
+from small_small_hr.models import (Leave, OverTime, StaffProfile,
+                                   get_taken_leave_days)
 from small_small_hr.serializers import StaffProfileSerializer
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -322,7 +323,7 @@ class TestForms(TestCase):
         request.session = {}
         request.user = AnonymousUser()
 
-        # 6 days of leave
+        # 1 day of leave
         start = datetime(
             2017, 6, 5, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
         end = datetime(
@@ -352,6 +353,11 @@ class TestForms(TestCase):
         self.assertEqual(Leave.PENDING, leave.status)
         self.assertEqual('', leave.comments)
         mock.assert_called_with(leave_obj=leave)
+        self.assertEqual(
+            1,
+            get_taken_leave_days(
+                staffprofile, Leave.PENDING, Leave.REGULAR, 2017, 2017)
+        )
 
     @override_settings(SSHR_DEFAULT_TIME=7)
     def test_leaveform_no_overlap(self):
