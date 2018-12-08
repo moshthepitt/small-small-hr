@@ -440,6 +440,9 @@ def get_taken_leave_days(
     taking into account weekends and weekend policy
     """
     count = Decimal(0)
+    free_days = FreeDay.objects.filter(
+        date__year__gte=start_year, date__year__lte=end_year
+    ).values_list('date', flat=True)
     queryset = Leave.objects.filter(
         staff=staffprofile,
         status=status,
@@ -448,7 +451,8 @@ def get_taken_leave_days(
     for leave_obj in queryset:
         days = get_days(start=leave_obj.start, end=leave_obj.end)
         for day in days:
-            if day.year >= start_year and day.year <= end_year:
+            if day.year >= start_year and day.year <= end_year and\
+                    day not in free_days:
                 day_value = settings.SSHR_DAY_LEAVE_VALUES[day.isoweekday()]
                 count = count + Decimal(day_value)
     return count
