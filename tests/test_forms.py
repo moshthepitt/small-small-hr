@@ -307,6 +307,77 @@ class TestForms(TestCase):
         self.assertEqual('', leave.comments)
         mock.assert_called_with(leave_obj=leave)
 
+    @override_settings(
+        SSHR_DEFAULT_TIME=7,
+        SSHR_ALLOW_OVERSUBSCRIBE=True,
+        SSHR_DAY_LEAVE_VALUES={
+            1: 1,  # Monday
+            2: 1,  # Tuesday
+            3: 1,  # Wednesday
+            4: 1,  # Thursday
+            5: 1,  # Friday
+            6: 1,  # Saturday
+            7: 1,  # Sunday
+        }
+    )
+    @patch('small_small_hr.forms.leave_application_email')
+    def test_leave_oversubscribe(self, mock):
+        """
+        Test leave oversubscribe works as expected
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
+        staffprofile.leave_days = 21
+        staffprofile.sick_days = 10
+        staffprofile.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        # 40 days of leave
+        start = datetime(
+            2017, 6, 1, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 7, 10, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
+                   leave_type=Leave.REGULAR, carried_over_days=0)
+
+        data = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.REGULAR,
+            'start': start,
+            'end': end,
+            'reason': 'Mini retirement',
+        }
+
+        form = ApplyLeaveForm(data=data)
+        self.assertTrue(form.is_valid())
+        leave = form.save()
+
+        # make it approved
+        leave.status = Leave.APPROVED
+        leave.save()
+        leave.refresh_from_db()
+
+        self.assertEqual(staffprofile, leave.staff)
+        self.assertEqual(Leave.REGULAR, leave.leave_type)
+        self.assertEqual(start, leave.start)
+        self.assertEqual(end, leave.end)
+        self.assertEqual(
+            timedelta(days=39).days, (leave.end - leave.start).days)
+        self.assertEqual('Mini retirement', leave.reason)
+        self.assertEqual(Leave.APPROVED, leave.status)
+        self.assertEqual('', leave.comments)
+        mock.assert_called_with(leave_obj=leave)
+        self.assertEqual(
+            40,
+            get_taken_leave_days(
+                staffprofile, Leave.APPROVED, Leave.REGULAR, 2017, 2017)
+        )
+        self.assertEqual(-19, staffprofile.get_available_leave_days(year=2017))
+
     @override_settings(SSHR_DEFAULT_TIME=7)
     @patch('small_small_hr.forms.leave_application_email')
     def test_one_day_leave(self, mock):
