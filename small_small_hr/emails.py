@@ -8,8 +8,9 @@ from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 
 
-def send_email(
-        name: str, email: str, subject: str, message: str, obj: object = None):
+def send_email(  # pylint: disable=too-many-arguments
+        name: str, email: str, subject: str, message: str, obj: object = None,
+        cc_list: list = None):
     """
     Sends a generic email
     """
@@ -35,6 +36,8 @@ def send_email(
     text_content = email_txt_body
     html_content = email_html_body
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
+    if cc_list:
+        msg.cc = cc_list
     msg.attach_alternative(html_content, "text/html")
 
     return msg.send(fail_silently=True)
@@ -46,15 +49,14 @@ def leave_application_email(leave_obj: object):
     """
     msg = getattr(
         settings,
-        'HR_LEAVE_APPLICATION_EMAIL_TXT',
+        'SSHR_LEAVE_APPLICATION_EMAIL_TXT',
         _("There has been a new leave application.  Please log in to process "
           "it."))
     subj = getattr(
         settings,
-        'HR_LEAVE_APPLICATION_EMAIL_SUBJ',
+        'SSHR_LEAVE_APPLICATION_EMAIL_SUBJ',
         _("New Leave Application"))
-    admin_emails = getattr(
-        settings, 'HR_ADMIN_EMAILS', [settings.DEFAULT_FROM_EMAIL])
+    admin_emails = settings.SSHR_ADMIN_LEAVE_EMAILS
 
     for admin_email in admin_emails:
         send_email(
@@ -72,12 +74,12 @@ def leave_processed_email(leave_obj: object):
     """
     if leave_obj.staff.user.email:
         msg = getattr(
-            settings, 'HR_LEAVE_PROCESSED_EMAIL_TXT',
+            settings, 'SSHR_LEAVE_PROCESSED_EMAIL_TXT',
             _(f"You leave application status is "
               f"{leave_obj.get_status_display()}.  Log in for more info.")
         )
         subj = getattr(
-            settings, 'HR_LEAVE_PROCESSED_EMAIL_SUBJ',
+            settings, 'SSHR_LEAVE_PROCESSED_EMAIL_SUBJ',
             _("Your leave application has been processed"))
 
         send_email(
@@ -85,7 +87,8 @@ def leave_processed_email(leave_obj: object):
             email=leave_obj.staff.user.email,
             subject=subj,
             message=msg,
-            obj=leave_obj
+            obj=leave_obj,
+            cc_list=settings.SSHR_ADMIN_LEAVE_EMAILS
         )
 
 
@@ -95,15 +98,14 @@ def overtime_application_email(overtime_obj: object):
     """
     msg = getattr(
         settings,
-        'HR_OVERTIME_APPLICATION_EMAIL_TXT',
+        'SSHR_OVERTIME_APPLICATION_EMAIL_TXT',
         _("There has been a new overtime application.  Please log in to "
           "process it."))
     subj = getattr(
         settings,
-        'HR_OVERTIME_APPLICATION_EMAIL_SUBJ',
+        'SSHR_OVERTIME_APPLICATION_EMAIL_SUBJ',
         _("New Overtime Application"))
-    admin_emails = getattr(
-        settings, 'HR_ADMIN_EMAILS', [settings.DEFAULT_FROM_EMAIL])
+    admin_emails = settings.SSHR_ADMIN_OVERTIME_EMAILS
 
     for admin_email in admin_emails:
         send_email(
@@ -122,12 +124,12 @@ def overtime_processed_email(overtime_obj: object):
     if overtime_obj.staff.user.email:
 
         msg = getattr(
-            settings, 'HR_OVERTIME_PROCESSED_EMAIL_TXT',
+            settings, 'SSHR_OVERTIME_PROCESSED_EMAIL_TXT',
             _(f"You overtime application status is "
               f"{overtime_obj.get_status_display()}.  Log in for more info.")
         )
         subj = getattr(
-            settings, 'HR_OVERTIME_PROCESSED_EMAIL_SUBJ',
+            settings, 'SSHR_OVERTIME_PROCESSED_EMAIL_SUBJ',
             _("Your overtime application has been processed"))
 
         send_email(
@@ -135,5 +137,6 @@ def overtime_processed_email(overtime_obj: object):
             email=overtime_obj.staff.user.email,
             subject=subj,
             message=msg,
-            obj=overtime_obj
+            obj=overtime_obj,
+            cc_list=settings.SSHR_ADMIN_OVERTIME_EMAILS
         )

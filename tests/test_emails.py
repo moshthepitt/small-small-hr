@@ -19,7 +19,9 @@ from small_small_hr.models import Leave, OverTime
 
 
 @override_settings(
-    HR_ADMIN_EMAILS=["hr@example.com"]
+    SSHR_ADMIN_EMAILS=["admin@example.com"],
+    SSHR_ADMIN_LEAVE_EMAILS=["hr@example.com"],
+    SSHR_ADMIN_OVERTIME_EMAILS=["ot@example.com"]
 )
 class TestEmails(TestCase):
     """
@@ -81,7 +83,8 @@ class TestEmails(TestCase):
             email="bob@example.com",
             subject="Your leave application has been processed",
             message="You leave application status is Approved.  Log in for more info.",  # noqa
-            obj=leave
+            obj=leave,
+            cc_list=['hr@example.com']
         )
 
     @patch('small_small_hr.emails.send_email')
@@ -101,7 +104,7 @@ class TestEmails(TestCase):
 
         mock.assert_called_with(
             name="Bob Ndoe",
-            email="hr@example.com",
+            email="ot@example.com",
             subject="New Overtime Application",
             message="There has been a new overtime application.  Please log in to process it.",  # noqa
             obj=overtime
@@ -127,7 +130,8 @@ class TestEmails(TestCase):
             email="bob@example.com",
             subject="Your overtime application has been processed",
             message="You overtime application status is Rejected.  Log in for more info.",  # noqa
-            obj=overtime
+            obj=overtime,
+            cc_list=['ot@example.com']
         )
 
     def test_send_email(self):
@@ -141,7 +145,8 @@ class TestEmails(TestCase):
             'name': 'Bob Munro',
             'email': 'bob@example.com',
             'subject': "I love oov",
-            'message': message
+            'message': message,
+            'cc_list': settings.SSHR_ADMIN_EMAILS
         }
 
         send_email(**data)
@@ -149,6 +154,7 @@ class TestEmails(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'I love oov')
         self.assertEqual(mail.outbox[0].to, ['Bob Munro <bob@example.com>'])
+        self.assertEqual(mail.outbox[0].cc, ['admin@example.com'])
         self.assertEqual(
             mail.outbox[0].body,
             'Hello Bob Munro,\n\nThe quick brown fox.\n\nThank you,\n\n'
