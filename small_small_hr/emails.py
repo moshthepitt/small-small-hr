@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 
 
-def send_email(  # pylint: disable=too-many-locals
+def send_email(  # pylint: disable=too-many-arguments, too-many-locals
         name: str, email: str, subject: str, message: str, obj: object = None,
         cc_list: list = None, template: str = 'generic'):
     """

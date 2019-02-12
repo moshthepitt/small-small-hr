@@ -470,6 +470,8 @@ class TestForms(TestCase):
         """
         Test leave oversubscribe when SSHR_ALLOW_OVERSUBSCRIBE is False
         """
+        mock.return_value = None
+
         user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
         staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
         staffprofile.leave_days = 21
