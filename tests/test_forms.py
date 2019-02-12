@@ -256,6 +256,52 @@ class TestForms(TestCase):
         self.assertEqual(OverTime.APPROVED, overtime.status)
         self.assertEqual('Cool', overtime.comments)
 
+    def test_overtime_form_process_with_overlap(self):
+        """
+        Test OverTimeForm with overlap for existing objects
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        # 6 hours of overtime
+        start = datetime(
+            2017, 6, 5, 18, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 5, 19, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        # make sure object already exists
+        mommy.make(
+            'small_small_hr.OverTime', start=start.time(), end=end.time(),
+            status=OverTime.APPROVED, date=start.date, staff=staffprofile)
+
+        data = {
+            'staff': staffprofile.id,
+            'date': start.date(),
+            'start': start.time(),
+            'end': end.time(),
+            'reason': 'Extra work',
+            'status': OverTime.REJECTED,
+            'comments': 'Already there'
+        }
+
+        form = OverTimeForm(data=data)
+        self.assertTrue(form.is_valid())
+        overtime = form.save()
+        self.assertEqual(staffprofile, overtime.staff)
+        self.assertEqual(start.date(), overtime.date)
+        self.assertEqual(start.time(), overtime.start)
+        self.assertEqual(end.time(), overtime.end)
+        self.assertEqual(
+            timedelta(seconds=3600).seconds,
+            overtime.get_duration().seconds)
+        self.assertEqual('Extra work', overtime.reason)
+        self.assertEqual(OverTime.REJECTED, overtime.status)
+        self.assertEqual('Already there', overtime.comments)
+
     def test_overtime_form_start_end(self):
         """
         Test OverTimeForm start end fields
@@ -656,6 +702,59 @@ class TestForms(TestCase):
         self.assertEqual('Need a break', leave.reason)
         self.assertEqual(Leave.REJECTED, leave.status)
         self.assertEqual('Just no', leave.comments)
+
+    @override_settings(SSHR_DEFAULT_TIME=7)
+    def test_leaveform_process_with_overlap(self):
+        """
+        Test LeaveForm process works even if leave object exists
+        """
+        user = mommy.make('auth.User', first_name='Bob', last_name='Ndoe')
+        staffprofile = mommy.make('small_small_hr.StaffProfile', user=user)
+        staffprofile.leave_days = 21
+        staffprofile.sick_days = 10
+        staffprofile.save()
+
+        request = self.factory.get('/')
+        request.session = {}
+        request.user = AnonymousUser()
+
+        # 6 days of leave
+        start = datetime(
+            2017, 6, 5, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(
+            2017, 6, 10, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        # make sure leave obj already exists for said dates
+        mommy.make(
+            'small_small_hr.Leave', staff=staffprofile, start=start,
+            end=end, leave_type=Leave.REGULAR,
+            status=Leave.APPROVED)
+
+        mommy.make('small_small_hr.AnnualLeave', staff=staffprofile, year=2017,
+                   leave_type=Leave.REGULAR, carried_over_days=4)
+
+        data = {
+            'staff': staffprofile.id,
+            'leave_type': Leave.REGULAR,
+            'start': start,
+            'end': end,
+            'reason': 'Need a break',
+            'comments': 'Already exists',
+            'status': Leave.REJECTED
+        }
+
+        form = LeaveForm(data=data)
+        self.assertTrue(form.is_valid())
+        leave = form.save()
+        self.assertEqual(staffprofile, leave.staff)
+        self.assertEqual(Leave.REGULAR, leave.leave_type)
+        self.assertEqual(start, leave.start)
+        self.assertEqual(end, leave.end)
+        self.assertEqual(
+            timedelta(days=5).days, (leave.end - leave.start).days)
+        self.assertEqual('Need a break', leave.reason)
+        self.assertEqual(Leave.REJECTED, leave.status)
+        self.assertEqual('Already exists', leave.comments)
 
     @override_settings(SSHR_DEFAULT_TIME=7)
     def test_sickleave_apply(self):
