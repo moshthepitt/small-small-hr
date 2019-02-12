@@ -25,6 +25,7 @@ SSHR_FREE_DAYS = [
     {'day': 26, 'month': 12},  # Boxing day
 ]  # these are days that are not counted when getting taken leave days
 # emails
+SSHR_ADMIN_NAME = "HR"
 SSHR_ADMIN_EMAILS = [settings.DEFAULT_FROM_EMAIL]
 SSHR_ADMIN_LEAVE_EMAILS = SSHR_ADMIN_EMAILS
 SSHR_ADMIN_OVERTIME_EMAILS = SSHR_ADMIN_EMAILS

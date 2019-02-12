@@ -68,7 +68,7 @@ def leave_application_email(leave_obj: object):
 
     for admin_email in admin_emails:
         send_email(
-            name=leave_obj.staff.get_name(),
+            name=settings.SSHR_ADMIN_NAME,
             email=admin_email,
             subject=subj,
             message=msg,
@@ -118,7 +118,7 @@ def overtime_application_email(overtime_obj: object):
 
     for admin_email in admin_emails:
         send_email(
-            name=overtime_obj.staff.get_name(),
+            name=settings.SSHR_ADMIN_NAME,
             email=admin_email,
             subject=subj,
             message=msg,

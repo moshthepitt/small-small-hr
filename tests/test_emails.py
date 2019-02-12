@@ -21,7 +21,8 @@ from small_small_hr.models import Leave, OverTime
 @override_settings(
     SSHR_ADMIN_EMAILS=["admin@example.com"],
     SSHR_ADMIN_LEAVE_EMAILS=["hr@example.com"],
-    SSHR_ADMIN_OVERTIME_EMAILS=["ot@example.com"]
+    SSHR_ADMIN_OVERTIME_EMAILS=["ot@example.com"],
+    SSHR_ADMIN_NAME="mosh"
 )
 class TestEmails(TestCase):
     """
@@ -55,7 +56,7 @@ class TestEmails(TestCase):
         leave_application_email(leave)
 
         mock.assert_called_with(
-            name="Bob Ndoe",
+            name="mosh",
             email="hr@example.com",
             subject="New Leave Application",
             message="There has been a new leave application.  Please log in to process it.",  # noqa
@@ -104,7 +105,7 @@ class TestEmails(TestCase):
         overtime_application_email(overtime)
 
         mock.assert_called_with(
-            name="Bob Ndoe",
+            name="mosh",
             email="ot@example.com",
             subject="New Overtime Application",
             message="There has been a new overtime application.  Please log in to process it.",  # noqa
@@ -222,7 +223,7 @@ class TestEmails(TestCase):
         leave_application_email(leave)
 
         context = dict(
-            name="Bob Ndoe",
+            name="mosh",
             subject="New Leave Application",
             message="There has been a new leave application.  Please log in to process it.",  # noqa
             object=leave,
@@ -260,7 +261,7 @@ class TestEmails(TestCase):
         overtime_application_email(overtime)
 
         context = dict(
-            name="Bob Ndoe",
+            name="mosh",
             subject="New Overtime Application",
             message="There has been a new overtime application.  Please log in to process it.",  # noqa
             object=overtime,
