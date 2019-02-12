@@ -8,11 +8,19 @@ from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 
 
-def send_email(  # pylint: disable=too-many-arguments
+def send_email(  # pylint: disable=too-many-arguments, too-many-locals
         name: str, email: str, subject: str, message: str, obj: object = None,
-        cc_list: list = None):
+        cc_list: list = None, template: str = 'generic'):
     """
     Sends a generic email
+
+    :param name: name of person
+    :param email: email address to send to
+    :param subject: the email's subject
+    :param message: the email's body text
+    :param obj: the object in question
+    :param cc_list: the list of email address to "CC"
+    :param template: the template to use
     """
     context = {
         'name': name,
@@ -22,12 +30,12 @@ def send_email(  # pylint: disable=too-many-arguments
         'SITE': Site.objects.get_current()
     }
     email_subject = render_to_string(
-        'small_small_hr/email/generic_email_subject.txt',
+        f'small_small_hr/email/{template}_email_subject.txt',
         context).replace('\n', '')
     email_txt_body = render_to_string(
-        'small_small_hr/email/generic_email_body.txt', context)
+        f'small_small_hr/email/{template}_email_body.txt', context)
     email_html_body = render_to_string(
-        'small_small_hr/email/generic_email_body.html', context
+        f'small_small_hr/email/{template}_email_body.html', context
         ).replace('\n', '')
 
     subject = email_subject
@@ -64,7 +72,8 @@ def leave_application_email(leave_obj: object):
             email=admin_email,
             subject=subj,
             message=msg,
-            obj=leave_obj
+            obj=leave_obj,
+            template='leave_application'
         )
 
 
@@ -113,7 +122,8 @@ def overtime_application_email(overtime_obj: object):
             email=admin_email,
             subject=subj,
             message=msg,
-            obj=overtime_obj
+            obj=overtime_obj,
+            template='overtime_application'
         )
 
 

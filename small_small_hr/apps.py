@@ -12,7 +12,7 @@ class SmallSmallHrConfig(AppConfig):
     app_label = 'small_small_hr'
 
     def ready(self):
-        # pylint: disable=unused-variable
+        # pylint: disable=unused-import
         import small_small_hr.signals  # noqa
 
         # set up app settings
