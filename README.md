@@ -4,6 +4,12 @@
 
 `small-small-hr` is a really really small and light-weight Django application that helps you (yes you!) to manage certain aspects of HR (human resource) in your small or large business/organization/whatever.
 
+## Installation
+
+```sh
+pip install small-small-hr
+```
+
 ## Features
 
 At this time, `small-small-hr` supports the following:
