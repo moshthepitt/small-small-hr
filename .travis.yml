@@ -7,11 +7,24 @@ matrix:
         - python: 3.6
           env: TOXENV=pylint
         - python: 3.6
-          env: TOXENV=py36
+          env: TOXENV=py36-django20
+        - python: 3.6
+          env: TOXENV=py36-django21
+        - python: 3.6
+          env: TOXENV=py36-django22
+        - python: 3.7
+          env: TOXENV=py37-django20
+          dist: xenial
+        - python: 3.7
+          env: TOXENV=py37-django21
+          dist: xenial
+        - python: 3.7
+          env: TOXENV=py37-django22
+          dist: xenial
 services:
     - postgresql
 addons:
-    postgresql: 9.6
+    postgresql: "9.6"
 before_script:
     - psql -c 'CREATE DATABASE small_small_hr;' -U postgres
 install:
