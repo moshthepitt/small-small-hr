@@ -332,8 +332,7 @@ class AnnualLeave(TimeStampedModel, models.Model):
     ]
 
     year = models.PositiveIntegerField(
-        _('Year'), choices=YEAR_CHOICES, default=datetime.today().year,
-        db_index=True)
+        _('Year'), choices=YEAR_CHOICES, default=2017, db_index=True)
     staff = models.ForeignKey(
         StaffProfile, verbose_name=_('Staff Member'), on_delete=models.CASCADE)
     leave_type = models.CharField(
