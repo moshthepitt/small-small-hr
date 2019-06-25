@@ -43,6 +43,8 @@ class AnnualLeaveForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
+        if not self.instance:
+            self.fields['year'].initial = datetime.today().year
         self.helper = FormHelper()
         self.helper.form_tag = True
         self.helper.form_method = 'post'
