@@ -66,6 +66,16 @@ Employees who are allowed overtime can log in and record overtime hours.  This i
 
 Admins can download overtime hours reports for a particular period.
 
+## Contribution
+
+All contributions are welcome.
+
+To set up the project:
+
+1. Clone this repo
+2. `pipenv sync --dev`
+3. `pre-commit install`
+
 ## Testing
 
 ```sh
