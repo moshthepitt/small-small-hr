@@ -1,0 +1,4 @@
+include LICENSE
+include README.md
+recursive-include small_small_hr/static *
+recursive-include small_small_hr/templates *
