@@ -1,0 +1,22 @@
+# load from setup.py
+-e .
+
+# others
+pycodestyle
+pydocstyle
+pylint
+pylint-django
+tox
+flake8
+pep8
+autopep8
+coverage
+yapf
+isort
+psycopg2-binary
+ipdb
+model_mommy
+black
+pre-commit
+mypy
+tblib
