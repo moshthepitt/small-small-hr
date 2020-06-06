@@ -73,7 +73,7 @@ All contributions are welcome.
 To set up the project:
 
 1. Clone this repo
-2. `pipenv sync --dev`
+2. `pip install -r requirements/dev.txt`
 3. `pre-commit install`
 
 ## Testing
@@ -83,3 +83,4 @@ To set up the project:
 pip install -U tox
 
 tox
+```
