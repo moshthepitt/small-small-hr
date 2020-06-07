@@ -23,11 +23,12 @@ setup(
     url="https://github.com/moshthepitt/small-small-hr",
     packages=find_packages(exclude=["docs", "tests"]),
     install_requires=[
-        "Django >= 2.0.11",
+        "Django >= 2.2",
         "voluptuous",
         "psycopg2-binary",
         "sorl-thumbnail",
         "django-private-storage",
+        "django-model-reviews",
         "phonenumberslite",
         "django-phonenumber-field",
         "django-crispy-forms",

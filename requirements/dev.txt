@@ -18,10 +18,13 @@ click==7.1.2              # via black
 coverage==5.1
 decorator==4.4.2          # via ipython, traitlets
 distlib==0.3.0            # via virtualenv
+django-braces==1.14.0     # via django-model-reviews
+django-contrib-comments==1.9.2  # via django-model-reviews
 django-crispy-forms==1.9.1
+django-model-reviews==1.0.0
 django-phonenumber-field==4.0.0
 django-private-storage==2.2.2
-django==3.0.7             # via django-phonenumber-field, djangorestframework, model-mommy
+django==3.0.7             # via django-braces, django-contrib-comments, django-model-reviews, django-phonenumber-field, djangorestframework, model-mommy
 djangorestframework==3.11.0
 filelock==3.0.12          # via tox, virtualenv
 flake8==3.8.2
@@ -64,7 +67,7 @@ pyparsing==2.4.7          # via packaging
 pytz==2020.1              # via babel, django
 pyyaml==5.3.1             # via pre-commit
 regex==2020.5.14          # via black
-six==1.15.0               # via astroid, packaging, tox, traitlets, virtualenv
+six==1.15.0               # via astroid, django-braces, django-contrib-comments, packaging, tox, traitlets, virtualenv
 snowballstemmer==2.0.0    # via pydocstyle
 sorl-thumbnail==12.6.3
 sqlparse==0.3.1           # via django
