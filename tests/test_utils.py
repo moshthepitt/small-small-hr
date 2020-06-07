@@ -48,7 +48,7 @@ class TestUtils(TestCase):
             leave_type=Leave.REGULAR,
             start=start,
             end=end,
-            status=Leave.APPROVED,
+            review_status=Leave.APPROVED,
             staff=staffprofile,
         )
 
@@ -94,7 +94,7 @@ class TestUtils(TestCase):
             leave_type=Leave.REGULAR,
             start=start,
             end=end,
-            status=Leave.APPROVED,
+            review_status=Leave.APPROVED,
             staff=staffprofile,
         )
 
