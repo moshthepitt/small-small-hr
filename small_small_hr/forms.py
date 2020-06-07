@@ -120,7 +120,15 @@ class OverTimeForm(forms.ModelForm):
         """Class meta options."""
 
         model = OverTime
-        fields = ["staff", "date", "start", "end", "reason", "status", "comments"]
+        fields = [
+            "staff",
+            "date",
+            "start",
+            "end",
+            "review_reason",
+            "review_status",
+            "comments",
+        ]
 
     def __init__(self, *args, **kwargs):
         """Initialize the form."""
@@ -138,8 +146,8 @@ class OverTimeForm(forms.ModelForm):
             Field("date",),
             Field("start",),
             Field("end",),
-            Field("reason",),
-            Field("status",),
+            Field("review_reason",),
+            Field("review_status",),
             Field("comments"),
             FormActions(Submit("submitBtn", _("Submit"), css_class="btn-primary"),),
         )
@@ -185,7 +193,7 @@ class ApplyOverTimeForm(OverTimeForm):
             "date",
             "start",
             "end",
-            "reason",
+            "review_reason",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -214,7 +222,7 @@ class ApplyOverTimeForm(OverTimeForm):
             Field("date",),
             Field("start",),
             Field("end",),
-            Field("reason",),
+            Field("review_reason",),
             FormActions(Submit("submitBtn", _("Submit"), css_class="btn-primary"),),
         )
 
@@ -235,7 +243,15 @@ class LeaveForm(forms.ModelForm):
         """Class meta options."""
 
         model = Leave
-        fields = ["staff", "leave_type", "start", "end", "reason", "status", "comments"]
+        fields = [
+            "staff",
+            "leave_type",
+            "start",
+            "end",
+            "review_reason",
+            "review_status",
+            "comments",
+        ]
 
     def __init__(self, *args, **kwargs):
         """Initialize the form."""
@@ -253,8 +269,8 @@ class LeaveForm(forms.ModelForm):
             Field("leave_type",),
             Field("start",),
             Field("end",),
-            Field("reason",),
-            Field("status",),
+            Field("review_reason",),
+            Field("review_status",),
             Field("comments"),
             FormActions(Submit("submitBtn", _("Submit"), css_class="btn-primary"),),
         )
@@ -349,7 +365,7 @@ class ApplyLeaveForm(LeaveForm):
             "leave_type",
             "start",
             "end",
-            "reason",
+            "review_reason",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -378,7 +394,7 @@ class ApplyLeaveForm(LeaveForm):
             Field("leave_type",),
             Field("start",),
             Field("end",),
-            Field("reason",),
+            Field("review_reason",),
             FormActions(Submit("submitBtn", _("Submit"), css_class="btn-primary"),),
         )
 
