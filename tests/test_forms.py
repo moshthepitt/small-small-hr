@@ -138,7 +138,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "date": start.date(),
             "start": start.time(),
             "end": end.time(),
-            "reason": "Extra work",
+            "review_reason": "Extra work",
         }
 
         form = ApplyOverTimeForm(data=data)
@@ -173,7 +173,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "small_small_hr.OverTime",
             start=start.time(),
             end=end.time(),
-            status=OverTime.APPROVED,
+            review_status=OverTime.APPROVED,
             date=start.date,
             staff=staffprofile,
         )
@@ -183,7 +183,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "date": start.date(),
             "start": start.time(),
             "end": end.time(),
-            "reason": "Extra work",
+            "review_reason": "Extra work",
         }
 
         form = ApplyOverTimeForm(data=data)
@@ -220,8 +220,8 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "date": start.date(),
             "start": start.time(),
             "end": end.time(),
-            "reason": "Extra work",
-            "status": OverTime.APPROVED,
+            "review_reason": "Extra work",
+            "review_status": OverTime.APPROVED,
             "comments": "Cool",
         }
 
@@ -257,7 +257,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "small_small_hr.OverTime",
             start=start.time(),
             end=end.time(),
-            status=OverTime.APPROVED,
+            review_status=OverTime.APPROVED,
             date=start.date,
             staff=staffprofile,
         )
@@ -267,8 +267,8 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "date": start.date(),
             "start": start.time(),
             "end": end.time(),
-            "reason": "Extra work",
-            "status": OverTime.REJECTED,
+            "review_reason": "Extra work",
+            "review_status": OverTime.REJECTED,
             "comments": "Already there",
         }
 
@@ -303,7 +303,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "date": start.date(),
             "start": start.time(),
             "end": end.time(),
-            "reason": "Extra work",
+            "review_reason": "Extra work",
         }
 
         form = OverTimeForm(data=data)
@@ -342,7 +342,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.REGULAR,
             "start": start,
             "end": end,
-            "reason": "Need a break",
+            "review_reason": "Need a break",
         }
 
         form = ApplyLeaveForm(data=data)
@@ -401,7 +401,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.REGULAR,
             "start": start,
             "end": end,
-            "reason": "Mini retirement",
+            "review_reason": "Mini retirement",
         }
 
         form = ApplyLeaveForm(data=data)
@@ -475,7 +475,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.REGULAR,
             "start": start,
             "end": end,
-            "reason": "Mini retirement",
+            "review_reason": "Mini retirement",
         }
 
         form = ApplyLeaveForm(data=data)
@@ -521,7 +521,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.REGULAR,
             "start": start,
             "end": end,
-            "reason": "Need a break",
+            "review_reason": "Need a break",
         }
 
         form = ApplyLeaveForm(data=data)
@@ -573,7 +573,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             leave_type=Leave.REGULAR,
             start=start,
             end=end,
-            status=Leave.APPROVED,
+            review_status=Leave.APPROVED,
             staff=staffprofile,
         )
 
@@ -582,7 +582,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.REGULAR,
             "start": start,
             "end": end,
-            "reason": "Need a break",
+            "review_reason": "Need a break",
         }
 
         form = ApplyLeaveForm(data=data)
@@ -625,8 +625,8 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.REGULAR,
             "start": start,
             "end": end,
-            "reason": "Need a break",
-            "status": Leave.APPROVED,
+            "review_reason": "Need a break",
+            "review_status": Leave.APPROVED,
             "comments": "Okay",
         }
 
@@ -672,9 +672,9 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.REGULAR,
             "start": start,
             "end": end,
-            "reason": "Need a break",
+            "review_reason": "Need a break",
             "comments": "Just no",
-            "status": Leave.REJECTED,
+            "review_status": Leave.REJECTED,
         }
 
         form = LeaveForm(data=data)
@@ -713,7 +713,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             start=start,
             end=end,
             leave_type=Leave.REGULAR,
-            status=Leave.APPROVED,
+            review_status=Leave.APPROVED,
         )
 
         mommy.make(
@@ -729,9 +729,9 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.REGULAR,
             "start": start,
             "end": end,
-            "reason": "Need a break",
+            "review_reason": "Need a break",
             "comments": "Already exists",
-            "status": Leave.REJECTED,
+            "review_status": Leave.REJECTED,
         }
 
         form = LeaveForm(data=data)
@@ -776,7 +776,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.SICK,
             "start": start,
             "end": end,
-            "reason": "Need a break",
+            "review_reason": "Need a break",
         }
 
         form = ApplyLeaveForm(data=data)
@@ -821,9 +821,9 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.SICK,
             "start": start,
             "end": end,
-            "reason": "Need a break",
+            "review_reason": "Need a break",
             "comments": "Just no",
-            "status": Leave.REJECTED,
+            "review_status": Leave.REJECTED,
         }
 
         form = LeaveForm(data=data)
@@ -867,7 +867,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.SICK,
             "start": start,
             "end": end,
-            "reason": "Need a break",
+            "review_reason": "Need a break",
         }
 
         form = LeaveForm(data=data)
@@ -884,7 +884,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.SICK,
             "start": start,
             "end": end,
-            "reason": "Need a break",
+            "review_reason": "Need a break",
         }
 
         form2 = LeaveForm(data=data2)
@@ -927,7 +927,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.REGULAR,
             "start": start,
             "end": end,
-            "reason": "Need a break",
+            "review_reason": "Need a break",
         }
 
         form = LeaveForm(data=data)
@@ -973,7 +973,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "leave_type": Leave.SICK,
             "start": start,
             "end": end,
-            "reason": "Need a break",
+            "review_reason": "Need a break",
         }
 
         form = LeaveForm(data=data)
