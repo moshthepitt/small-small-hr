@@ -127,7 +127,6 @@ class OverTimeForm(forms.ModelForm):
             "end",
             "review_reason",
             "review_status",
-            "comments",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -148,7 +147,6 @@ class OverTimeForm(forms.ModelForm):
             Field("end",),
             Field("review_reason",),
             Field("review_status",),
-            Field("comments"),
             FormActions(Submit("submitBtn", _("Submit"), css_class="btn-primary"),),
         )
 
@@ -250,7 +248,6 @@ class LeaveForm(forms.ModelForm):
             "end",
             "review_reason",
             "review_status",
-            "comments",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -271,7 +268,6 @@ class LeaveForm(forms.ModelForm):
             Field("end",),
             Field("review_reason",),
             Field("review_status",),
-            Field("comments"),
             FormActions(Submit("submitBtn", _("Submit"), css_class="btn-primary"),),
         )
 

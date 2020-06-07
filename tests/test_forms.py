@@ -155,7 +155,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         )
         self.assertEqual("Extra work", overtime.review_reason)
         self.assertEqual(OverTime.PENDING, overtime.review_status)
-        self.assertEqual("", overtime.comments)
         mock.assert_called_with(overtime_obj=overtime)
 
     def test_overtime_form_apply_no_overlap(self):
@@ -224,7 +223,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "end": end.time(),
             "review_reason": "Extra work",
             "review_status": OverTime.APPROVED,
-            "comments": "Cool",
         }
 
         form = OverTimeForm(data=data)
@@ -239,7 +237,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         )
         self.assertEqual("Extra work", overtime.review_reason)
         self.assertEqual(OverTime.APPROVED, overtime.review_status)
-        self.assertEqual("Cool", overtime.comments)
 
     def test_overtime_form_process_with_overlap(self):
         """Test OverTimeForm with overlap for existing objects."""
@@ -271,7 +268,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "end": end.time(),
             "review_reason": "Extra work",
             "review_status": OverTime.REJECTED,
-            "comments": "Already there",
         }
 
         form = OverTimeForm(data=data)
@@ -286,7 +282,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         )
         self.assertEqual("Extra work", overtime.review_reason)
         self.assertEqual(OverTime.REJECTED, overtime.review_status)
-        self.assertEqual("Already there", overtime.comments)
 
     def test_overtime_form_start_end(self):
         """Test OverTimeForm start end fields."""
@@ -357,7 +352,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(timedelta(days=5).days, (leave.end - leave.start).days)
         self.assertEqual("Need a break", leave.review_reason)
         self.assertEqual(Leave.PENDING, leave.review_status)
-        self.assertEqual("", leave.comments)
         mock.assert_called_with(leave_obj=leave)
 
     @override_settings(
@@ -424,7 +418,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(timedelta(days=39).days, (leave.end - leave.start).days)
         self.assertEqual("Mini retirement", leave.review_reason)
         self.assertEqual(Leave.APPROVED, leave.review_status)
-        self.assertEqual("", leave.comments)
         mock.assert_called_with(leave_obj=leave)
         self.assertEqual(
             40,
@@ -538,7 +531,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(timedelta(days=0).days, (leave.end - leave.start).days)
         self.assertEqual("Need a break", leave.review_reason)
         self.assertEqual(Leave.PENDING, leave.review_status)
-        self.assertEqual("", leave.comments)
         mock.assert_called_with(leave_obj=leave)
         self.assertEqual(
             1,
@@ -631,7 +623,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "end": end,
             "review_reason": "Need a break",
             "review_status": Leave.APPROVED,
-            "comments": "Okay",
         }
 
         form = LeaveForm(data=data)
@@ -644,7 +635,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(timedelta(days=5).days, (leave.end - leave.start).days)
         self.assertEqual("Need a break", leave.review_reason)
         self.assertEqual(Leave.APPROVED, leave.review_status)
-        self.assertEqual("Okay", leave.comments)
 
     @override_settings(SSHR_DEFAULT_TIME=7)
     def test_leaveform_process(self):
@@ -677,7 +667,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "start": start,
             "end": end,
             "review_reason": "Need a break",
-            "comments": "Just no",
             "review_status": Leave.REJECTED,
         }
 
@@ -691,7 +680,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(timedelta(days=5).days, (leave.end - leave.start).days)
         self.assertEqual("Need a break", leave.review_reason)
         self.assertEqual(Leave.REJECTED, leave.review_status)
-        self.assertEqual("Just no", leave.comments)
 
     @override_settings(SSHR_DEFAULT_TIME=7)
     def test_leaveform_process_with_overlap(self):
@@ -734,7 +722,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "start": start,
             "end": end,
             "review_reason": "Need a break",
-            "comments": "Already exists",
             "review_status": Leave.REJECTED,
         }
 
@@ -748,7 +735,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(timedelta(days=5).days, (leave.end - leave.start).days)
         self.assertEqual("Need a break", leave.review_reason)
         self.assertEqual(Leave.REJECTED, leave.review_status)
-        self.assertEqual("Already exists", leave.comments)
 
     @override_settings(SSHR_DEFAULT_TIME=7)
     def test_sickleave_apply(self):
@@ -793,7 +779,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(timedelta(days=5).days, (leave.end - leave.start).days)
         self.assertEqual("Need a break", leave.review_reason)
         self.assertEqual(Leave.PENDING, leave.review_status)
-        self.assertEqual("", leave.comments)
 
     @override_settings(SSHR_DEFAULT_TIME=7)
     def test_sickleave_process(self):
@@ -826,7 +811,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "start": start,
             "end": end,
             "review_reason": "Need a break",
-            "comments": "Just no",
             "review_status": Leave.REJECTED,
         }
 
@@ -840,7 +824,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(timedelta(days=5).days, (leave.end - leave.start).days)
         self.assertEqual("Need a break", leave.review_reason)
         self.assertEqual(Leave.REJECTED, leave.review_status)
-        self.assertEqual("Just no", leave.comments)
 
     def test_leaveform_start_end(self):
         """Test start and end."""
