@@ -1,62 +1,10 @@
 """Emails module for scam app."""
 from django.conf import settings
-from django.contrib.sites.models import Site
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 
+from model_reviews.emails import send_email
+
 from small_small_hr.models import Leave, OverTime
-
-
-def send_email(  # pylint: disable=too-many-arguments,too-many-locals,bad-continuation
-    name: str,
-    email: str,
-    subject: str,
-    message: str,
-    obj: object = None,
-    cc_list: list = None,
-    template: str = "generic",
-    template_path: str = "small_small_hr/email",
-):
-    """
-    Send a generic email.
-
-    :param name: name of person
-    :param email: email address to send to
-    :param subject: the email's subject
-    :param message: the email's body text
-    :param obj: the object in question
-    :param cc_list: the list of email address to "CC"
-    :param template: the template to use
-    """
-    context = {
-        "name": name,
-        "subject": subject,
-        "message": message,
-        "object": obj,
-        "SITE": Site.objects.get_current(),
-    }
-    email_subject = render_to_string(
-        f"{template_path}/{template}_email_subject.txt", context
-    ).replace("\n", "")
-    email_txt_body = render_to_string(
-        f"{template_path}/{template}_email_body.txt", context
-    )
-    email_html_body = render_to_string(
-        f"{template_path}/{template}_email_body.html", context
-    ).replace("\n", "")
-
-    subject = email_subject
-    from_email = settings.DEFAULT_FROM_EMAIL
-    to_email = f"{name} <{email}>"
-    text_content = email_txt_body
-    html_content = email_html_body
-    msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
-    if cc_list:
-        msg.cc = cc_list
-    msg.attach_alternative(html_content, "text/html")
-
-    return msg.send(fail_silently=True)
 
 
 def leave_application_email(leave_obj: Leave):
@@ -79,6 +27,7 @@ def leave_application_email(leave_obj: Leave):
             message=msg,
             obj=leave_obj,
             template="leave_application",
+            template_path="small_small_hr/email",
         )
 
 
@@ -106,6 +55,7 @@ def leave_processed_email(leave_obj: Leave):
             message=msg,
             obj=leave_obj,
             cc_list=settings.SSHR_ADMIN_LEAVE_EMAILS,
+            template_path="small_small_hr/email",
         )
 
 
@@ -132,6 +82,7 @@ def overtime_application_email(overtime_obj: OverTime):
             message=msg,
             obj=overtime_obj,
             template="overtime_application",
+            template_path="small_small_hr/email",
         )
 
 
@@ -160,4 +111,5 @@ def overtime_processed_email(overtime_obj: OverTime):
             message=msg,
             obj=overtime_obj,
             cc_list=settings.SSHR_ADMIN_OVERTIME_EMAILS,
+            template_path="small_small_hr/email",
         )
