@@ -6,11 +6,13 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase, override_settings
 
 import pytz
 from model_mommy import mommy
+from model_reviews.models import ModelReview
 
 from small_small_hr.forms import (
     AnnualLeaveForm,
@@ -409,8 +411,10 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         leave = form.save()
 
         # make it approved
-        leave.review_status = Leave.APPROVED
-        leave.save()
+        obj_type = ContentType.objects.get_for_model(leave)
+        review = ModelReview.objects.get(content_type=obj_type, object_id=leave.id)
+        review.review_status = ModelReview.APPROVED
+        review.save()
         leave.refresh_from_db()
 
         self.assertEqual(staffprofile, leave.staff)
