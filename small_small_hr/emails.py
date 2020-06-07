@@ -1,6 +1,4 @@
-"""
-Emails module for scam app
-"""
+"""Emails module for scam app."""
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import EmailMultiAlternatives
@@ -21,7 +19,7 @@ def send_email(  # pylint: disable=too-many-arguments,too-many-locals,bad-contin
     template_path: str = "small_small_hr/email",
 ):
     """
-    Sends a generic email
+    Send a generic email.
 
     :param name: name of person
     :param email: email address to send to
@@ -62,9 +60,7 @@ def send_email(  # pylint: disable=too-many-arguments,too-many-locals,bad-contin
 
 
 def leave_application_email(leave_obj: Leave):
-    """
-    Sends an email to admins when a leave application is made
-    """
+    """Send an email to admins when a leave application is made."""
     msg = getattr(
         settings,
         "SSHR_LEAVE_APPLICATION_EMAIL_TXT",
@@ -87,16 +83,14 @@ def leave_application_email(leave_obj: Leave):
 
 
 def leave_processed_email(leave_obj: Leave):
-    """
-    Sends an email to admins when a leave application is processed
-    """
+    """Send an email to admins when a leave application is processed."""
     if leave_obj.staff.user.email:
         msg = getattr(
             settings,
             "SSHR_LEAVE_PROCESSED_EMAIL_TXT",
             _(
                 f"You leave application status is "
-                f"{leave_obj.get_status_display()}.  Log in for more info."
+                f"{leave_obj.get_review_status_display()}.  Log in for more info."
             ),
         )
         subj = getattr(
@@ -116,9 +110,7 @@ def leave_processed_email(leave_obj: Leave):
 
 
 def overtime_application_email(overtime_obj: OverTime):
-    """
-    Sends an email to admins when an overtime application is made
-    """
+    """Send an email to admins when an overtime application is made."""
     msg = getattr(
         settings,
         "SSHR_OVERTIME_APPLICATION_EMAIL_TXT",
@@ -144,9 +136,7 @@ def overtime_application_email(overtime_obj: OverTime):
 
 
 def overtime_processed_email(overtime_obj: OverTime):
-    """
-    Sends an email to admins when an overtime application is processed
-    """
+    """Send an email to admins when an overtime application is processed."""
     if overtime_obj.staff.user.email:
 
         msg = getattr(
@@ -154,7 +144,7 @@ def overtime_processed_email(overtime_obj: OverTime):
             "SSHR_OVERTIME_PROCESSED_EMAIL_TXT",
             _(
                 f"You overtime application status is "
-                f"{overtime_obj.get_status_display()}.  Log in for more info."
+                f"{overtime_obj.get_review_status_display()}.  Log in for more info."
             ),
         )
         subj = getattr(
