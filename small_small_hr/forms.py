@@ -159,7 +159,7 @@ class OverTimeForm(forms.ModelForm):
         start = cleaned_data.get("start")
         date = cleaned_data.get("date")
         staff = cleaned_data.get("staff")
-        status = cleaned_data.get("status")
+        review_status = cleaned_data.get("review_status")
 
         # end must be later than start
         if end <= start:
@@ -168,13 +168,13 @@ class OverTimeForm(forms.ModelForm):
         # must not overlap within the same date unless being rejected
         # pylint: disable=no-member
         overlap_qs = OverTime.objects.filter(
-            date=date, staff=staff, status=OverTime.APPROVED
+            date=date, staff=staff, review_status=OverTime.APPROVED
         ).filter(Q(start__gte=start) & Q(end__lte=end))
 
         if self.instance is not None:
             overlap_qs = overlap_qs.exclude(id=self.instance.id)
 
-        if overlap_qs.exists() and status != OverTime.REJECTED:
+        if overlap_qs.exists() and review_status != OverTime.REJECTED:
             msg = _("you cannot have overlapping overtime hours on the " "same day")
             self.add_error("start", msg)
             self.add_error("end", msg)
@@ -302,7 +302,7 @@ class LeaveForm(forms.ModelForm):
         staff = cleaned_data.get("staff")
         end = cleaned_data.get("end")
         start = cleaned_data.get("start")
-        status = cleaned_data.get("status")
+        review_status = cleaned_data.get("review_status")
 
         if all([staff, leave_type, start, end]):
             # end year and start year must be the same
@@ -341,13 +341,13 @@ class LeaveForm(forms.ModelForm):
             # must not overlap unless it is being rejected
             # pylint: disable=no-member
             overlap_qs = Leave.objects.filter(
-                staff=staff, status=Leave.APPROVED, leave_type=leave_type
+                staff=staff, review_status=Leave.APPROVED, leave_type=leave_type
             ).filter(Q(start__gte=start) & Q(end__lte=end))
 
             if self.instance is not None:
                 overlap_qs = overlap_qs.exclude(id=self.instance.id)
 
-            if overlap_qs.exists() and status != Leave.REJECTED:
+            if overlap_qs.exists() and review_status != Leave.REJECTED:
                 msg = _("you cannot have overlapping leave days")
                 self.add_error("start", msg)
                 self.add_error("end", msg)
