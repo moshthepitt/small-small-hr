@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'rest_framework',
     # custom
     'small_small_hr',
+    'model_reviews',
 ]
 
 DATABASES = {
