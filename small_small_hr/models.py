@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 
+from model_reviews.models import AbstractReview
 from phonenumber_field.modelfields import PhoneNumberField
 from private_storage.fields import PrivateFileField
 from sorl.thumbnail import ImageField
@@ -226,33 +227,23 @@ class StaffDocument(TimeStampedModel, models.Model):
         return f'{self.staff.get_name()} - {self.name}'
 
 
-class BaseStaffRequest(TimeStampedModel, models.Model):
+class BaseStaffRequest(TimeStampedModel, AbstractReview):
     """
     Abstract model class for Leave & Overtime tracking
     """
-    APPROVED = '1'
-    REJECTED = '2'
-    PENDING = '3'
-
-    STATUS_CHOICES = (
-        (APPROVED, _('Approved')),
-        (PENDING, _('Pending')),
-        (REJECTED, _('Rejected'))
-    )
-
     staff = models.ForeignKey(
         StaffProfile, verbose_name=_('Staff Member'), on_delete=models.CASCADE)
     start = models.DateTimeField(_('Start Date'))
     end = models.DateTimeField(_('End Date'))
-    reason = models.TextField(_('Reason'), blank=True, default='')
-    status = models.CharField(
-        _('Status'), max_length=1, choices=STATUS_CHOICES, default=PENDING,
-        blank=True, db_index=True)
+    review_reason = models.TextField(_('Reason'), blank=True, default='')
+    review_status = models.CharField(
+        _('Status'), max_length=1, choices=AbstractReview.STATUS_CHOICES,
+        default=AbstractReview.PENDING, blank=True, db_index=True)
     comments = models.TextField(_('Comments'), blank=True, default='')
 
     class Meta:  # pylint: disable=too-few-public-methods
         """
-        Meta options for StaffDocument
+        Meta options for BaseStaffRequest
         """
         abstract = True
 
