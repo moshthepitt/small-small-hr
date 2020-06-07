@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext as _
 
 from model_reviews.models import AbstractReview
+from mptt.models import MPTTModel, TreeForeignKey
 from phonenumber_field.modelfields import PhoneNumberField
 from private_storage.fields import PrivateFileField
 from sorl.thumbnail import ImageField
@@ -53,7 +54,7 @@ class Role(TimeStampedModel, models.Model):
         return self.name
 
 
-class StaffProfile(TimeStampedModel, models.Model):
+class StaffProfile(TimeStampedModel, MPTTModel):
     """
     StaffProfile model class.
 
@@ -75,6 +76,14 @@ class StaffProfile(TimeStampedModel, models.Model):
     )
 
     user = models.OneToOneField(USER, verbose_name=_("User"), on_delete=models.CASCADE)
+    supervisor = TreeForeignKey(
+        "self",
+        verbose_name=_("Supervisor"),
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="children",
+    )
     image = ImageField(
         upload_to="staff-images/",
         max_length=255,
