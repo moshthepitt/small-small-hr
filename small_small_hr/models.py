@@ -253,7 +253,6 @@ class BaseStaffRequest(TimeStampedModel, AbstractReview):
         blank=True,
         db_index=True,
     )
-    comments = models.TextField(_("Comments"), blank=True, default="")
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta options for BaseStaffRequest."""
