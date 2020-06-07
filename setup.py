@@ -7,8 +7,8 @@ from setuptools import find_packages, setup
 
 # read the contents of your README file
 with open(
-        path.join(path.abspath(path.dirname(__file__)), "README.md"),
-        encoding="utf-8") as f:
+    path.join(path.abspath(path.dirname(__file__)), "README.md"), encoding="utf-8"
+) as f:
     LONG_DESCRIPTION = f.read()
 
 setup(
@@ -35,6 +35,7 @@ setup(
         "djangorestframework",
         "sorl-thumbnail",
         "Pillow",
+        "django-mptt",
     ],
     classifiers=[
         "Programming Language :: Python",
