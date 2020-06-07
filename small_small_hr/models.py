@@ -453,7 +453,7 @@ def get_taken_leave_days(  # pylint: disable=bad-continuation
         date__year__gte=start_year, date__year__lte=end_year
     ).values_list("date", flat=True)
     queryset = Leave.objects.filter(
-        staff=staffprofile, status=status, leave_type=leave_type
+        staff=staffprofile, review_status=status, leave_type=leave_type
     ).filter(Q(start__year__gte=start_year) | Q(end__year__lte=end_year))
     for leave_obj in queryset:
         days = get_days(start=leave_obj.start, end=leave_obj.end)
