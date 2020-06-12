@@ -1,6 +1,7 @@
 """Models module for small_small_hr."""
 from datetime import datetime, timedelta
 from decimal import Decimal
+from typing import Optional
 
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
@@ -267,6 +268,16 @@ class BaseStaffRequest(TimeStampedModel, AbstractReview):
         blank=True,
         db_index=True,
     )
+
+    # MODEL REVIEW OPTIONS
+    # path to function that will be used to determine reviewers
+    set_reviewers_function: Optional[
+        str
+    ] = "small_small_hr.reviews.set_staff_request_reviewer"
+    # path to function that will be used to determine the user for a review object
+    set_user_function: Optional[
+        str
+    ] = "small_small_hr.reviews.set_staff_request_review_user"
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta options for BaseStaffRequest."""
