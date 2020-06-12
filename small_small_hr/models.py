@@ -78,7 +78,7 @@ class StaffProfile(TimeStampedModel, MPTTModel):
     user = models.OneToOneField(USER, verbose_name=_("User"), on_delete=models.CASCADE)
     supervisor = TreeForeignKey(
         "self",
-        verbose_name=_("Supervisor"),
+        verbose_name=_("Manager"),
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -148,6 +148,11 @@ class StaffProfile(TimeStampedModel, MPTTModel):
         verbose_name = _("Staff Profile")
         verbose_name_plural = _("Staff Profiles")
         ordering = ["user__first_name", "user__last_name", "user__username", "created"]
+
+    class MPTTMeta:
+        """Meta options for MPTT."""
+
+        parent_attr = "supervisor"
 
     def get_name(self):
         """Return the staff member's name."""
