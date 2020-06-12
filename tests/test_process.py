@@ -113,6 +113,8 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(ModelReview.APPROVED, review.review_status)
         self.assertEqual(Leave.APPROVED, leave.review_status)
 
+        mock.assert_has_calls(expected_calls)
+
         # boss rejects it
         data = {
             "review": review.pk,
