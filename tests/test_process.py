@@ -113,6 +113,18 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(ModelReview.APPROVED, review.review_status)
         self.assertEqual(Leave.APPROVED, leave.review_status)
 
+        expected_calls.append(
+            call(
+                name="Bob Ndoe",
+                email="bob@example.com",
+                subject="Your request has been processed",
+                message="Your request has been processed, please log in to view the status.",  # noqa  # pylint: disable=line-too-long
+                obj=review,
+                cc_list=None,
+                template="generic",
+                template_path="model_reviews/email",
+            )
+        )
         mock.assert_has_calls(expected_calls)
 
         # boss rejects it
@@ -128,3 +140,19 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
         leave.refresh_from_db()
         self.assertEqual(ModelReview.REJECTED, review.review_status)
         self.assertEqual(Leave.REJECTED, leave.review_status)
+
+        expected_calls.append(
+            call(
+                name="Bob Ndoe",
+                email="bob@example.com",
+                subject="Your request has been processed",
+                message="Your request has been processed, please log in to view the status.",  # noqa  # pylint: disable=line-too-long
+                obj=review,
+                cc_list=None,
+                template="generic",
+                template_path="model_reviews/email",
+            )
+        )
+        mock.assert_has_calls(expected_calls)
+
+        self.assertEqual(4, mock.call_count)
