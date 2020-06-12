@@ -23,16 +23,22 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
         self.factory = RequestFactory()
         StaffProfile.objects.rebuild()
         hr_group = mommy.make("auth.Group", name=settings.SSHR_ADMIN_USER_GROUP_NAME)
-        self.boss = mommy.make("auth.User", first_name="Boss", last_name="Lady")
+        self.boss = mommy.make(
+            "auth.User", first_name="Boss", last_name="Lady", email="boss@example.com"
+        )
         self.boss.groups.add(hr_group)
 
     @patch("model_reviews.emails.send_email")
     def test_review_process(self, mock):  # pylint: disable=too-many-locals
         """Test the review process."""
-        manager = mommy.make("auth.User", first_name="Jane", last_name="Ndoe")
+        manager = mommy.make(
+            "auth.User", first_name="Jane", last_name="Ndoe", email="jane@example.com"
+        )
         manager_profile = mommy.make("small_small_hr.StaffProfile", user=manager)
 
-        user = mommy.make("auth.User", first_name="Bob", last_name="Ndoe")
+        user = mommy.make(
+            "auth.User", first_name="Bob", last_name="Ndoe", email="bob@example.com"
+        )
         staffprofile = mommy.make("small_small_hr.StaffProfile", user=user)
         staffprofile.supervisor = manager_profile
         staffprofile.leave_days = 21
@@ -70,8 +76,8 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
 
         expected_calls = [
             call(
-                name="r1",
-                email="r1@example.com",
+                name="Jane Ndoe",
+                email="jane@example.com",
                 subject="New Request For Approval",
                 message="There has been a new request that needs your attention.",
                 obj=review,
@@ -80,8 +86,8 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
                 template_path="model_reviews/email",
             ),
             call(
-                name="Jane Doe",
-                email="r2@example.com",
+                name="Boss Lady",
+                email="boss@example.com",
                 subject="New Request For Approval",
                 message="There has been a new request that needs your attention.",
                 obj=review,
