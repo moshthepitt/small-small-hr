@@ -43,8 +43,8 @@ def set_staff_request_reviewer(review_obj: models.Model):
             reviewer = Reviewer(review=review_obj, user=manager.user)
             reviewer.save()  # ensure save method is called
 
-    hr_group = settings.SSHR_ADMIN_USER_GROUP_NAME
-    for user in User.objects.filter(groups__name=hr_group):
+    hr_group_name = settings.SSHR_ADMIN_USER_GROUP_NAME
+    for user in User.objects.filter(groups__name=hr_group_name):
         if not Reviewer.objects.filter(review=review_obj, user=user).exists():
             reviewer = Reviewer(review=review_obj, user=user)
             reviewer.save()  # ensure save method is called
