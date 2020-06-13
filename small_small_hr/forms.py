@@ -14,7 +14,6 @@ from crispy_forms.layout import Layout, Submit
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.phonenumber import PhoneNumber
 
-from small_small_hr.emails import leave_application_email, overtime_application_email
 from small_small_hr.models import (
     TWOPLACES,
     AnnualLeave,
@@ -227,7 +226,6 @@ class ApplyOverTimeForm(OverTimeForm):
     def save(self, commit=True):
         """Save the form."""
         overtime = super().save()
-        overtime_application_email(overtime_obj=overtime)
         return overtime
 
 
@@ -397,7 +395,6 @@ class ApplyLeaveForm(LeaveForm):
     def save(self, commit=True):
         """Save the form."""
         leave = super().save()
-        leave_application_email(leave_obj=leave)
         return leave
 
 
