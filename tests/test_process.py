@@ -28,7 +28,7 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
         )
         self.boss.groups.add(hr_group)
 
-    @patch("model_reviews.emails.send_email")
+    @patch("small_small_hr.emails.send_email")
     def test_leave_review_process(self, mock):  # pylint: disable=too-many-locals
         """Test the Leave review process."""
         manager = mommy.make(
@@ -82,7 +82,7 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
                 message="There has been a new request that needs your attention.",
                 obj=review,
                 cc_list=None,
-                template="leave",
+                template="leave_application",
                 template_path="small_small_hr/email",
             ),
             call(
@@ -92,7 +92,7 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
                 message="There has been a new request that needs your attention.",
                 obj=review,
                 cc_list=None,
-                template="leave",
+                template="leave_application",
                 template_path="small_small_hr/email",
             ),
         ]
@@ -121,7 +121,7 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
                 message="Your request has been processed, please log in to view the status.",  # noqa  # pylint: disable=line-too-long
                 obj=review,
                 cc_list=None,
-                template="leave",
+                template="leave_completed",
                 template_path="small_small_hr/email",
             )
         )
@@ -149,7 +149,7 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
                 message="Your request has been processed, please log in to view the status.",  # noqa  # pylint: disable=line-too-long
                 obj=review,
                 cc_list=None,
-                template="leave",
+                template="leave_completed",
                 template_path="small_small_hr/email",
             )
         )
@@ -157,7 +157,7 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
 
         self.assertEqual(4, mock.call_count)
 
-    @patch("model_reviews.emails.send_email")
+    @patch("small_small_hr.emails.send_email")
     def test_overtime_review_process(self, mock):  # pylint: disable=too-many-locals
         """Test the OverTime review process."""
         manager = mommy.make(
@@ -211,7 +211,7 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
                 message="There has been a new request that needs your attention.",
                 obj=review,
                 cc_list=None,
-                template="overtime",
+                template="overtime_application",
                 template_path="small_small_hr/email",
             ),
             call(
@@ -221,7 +221,7 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
                 message="There has been a new request that needs your attention.",
                 obj=review,
                 cc_list=None,
-                template="overtime",
+                template="overtime_application",
                 template_path="small_small_hr/email",
             ),
         ]
@@ -250,7 +250,7 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
                 message="Your request has been processed, please log in to view the status.",  # noqa  # pylint: disable=line-too-long
                 obj=review,
                 cc_list=None,
-                template="overtime",
+                template="overtime_completed",
                 template_path="small_small_hr/email",
             )
         )
@@ -278,7 +278,7 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
                 message="Your request has been processed, please log in to view the status.",  # noqa  # pylint: disable=line-too-long
                 obj=review,
                 cc_list=None,
-                template="overtime",
+                template="overtime_completed",
                 template_path="small_small_hr/email",
             )
         )
