@@ -16,11 +16,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from private_storage.fields import PrivateFileField
 from sorl.thumbnail import ImageField
 
-from small_small_hr.constants import (
-    EMAIL_TEMPLATE_PATH,
-    LEAVE_EMAIL_TEMPLATE,
-    OVERTIME_EMAIL_TEMPLATE,
-)
+from small_small_hr.constants import EMAIL_TEMPLATE_PATH
 from small_small_hr.managers import LeaveManager
 
 USER = settings.AUTH_USER_MODEL
@@ -313,8 +309,15 @@ class Leave(BaseStaffRequest):
     objects = LeaveManager()
 
     # MODEL REVIEW OPTIONS
-    email_template = LEAVE_EMAIL_TEMPLATE
     email_template_path = EMAIL_TEMPLATE_PATH
+    # path to function that will be used to send email to reviewers
+    request_for_review_function: Optional[
+        str
+    ] = "small_small_hr.emails.send_request_for_leave_review"
+    # path to function that will be used to send email to user after review
+    review_complete_notify_function: Optional[
+        str
+    ] = "small_small_hr.emails.send_leave_review_complete_notice"
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta options for Leave."""
@@ -340,8 +343,15 @@ class OverTime(BaseStaffRequest):
     end = models.TimeField(_("End"), auto_now=False, auto_now_add=False)
 
     # MODEL REVIEW OPTIONS
-    email_template = OVERTIME_EMAIL_TEMPLATE
     email_template_path = EMAIL_TEMPLATE_PATH
+    # path to function that will be used to send email to reviewers
+    request_for_review_function: Optional[
+        str
+    ] = "small_small_hr.emails.send_request_for_overtime_review"
+    # path to function that will be used to send email to user after review
+    review_complete_notify_function: Optional[
+        str
+    ] = "small_small_hr.emails.send_overtime_review_complete_notice"
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta options for OverTime."""
