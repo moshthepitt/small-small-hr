@@ -1,2 +1,5 @@
 """Constants."""
 STAFF = "staff"
+OVERTIME_EMAIL_TEMPLATE = "overtime"
+LEAVE_EMAIL_TEMPLATE = "leave"
+EMAIL_TEMPLATE_PATH = "small_small_hr/email"
