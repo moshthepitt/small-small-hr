@@ -82,8 +82,8 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
                 message="There has been a new request that needs your attention.",
                 obj=review,
                 cc_list=None,
-                template="generic",
-                template_path="model_reviews/email",
+                template="leave",
+                template_path="small_small_hr/email",
             ),
             call(
                 name="Boss Lady",
@@ -92,8 +92,8 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
                 message="There has been a new request that needs your attention.",
                 obj=review,
                 cc_list=None,
-                template="generic",
-                template_path="model_reviews/email",
+                template="leave",
+                template_path="small_small_hr/email",
             ),
         ]
 
@@ -121,8 +121,8 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
                 message="Your request has been processed, please log in to view the status.",  # noqa  # pylint: disable=line-too-long
                 obj=review,
                 cc_list=None,
-                template="generic",
-                template_path="model_reviews/email",
+                template="leave",
+                template_path="small_small_hr/email",
             )
         )
         mock.assert_has_calls(expected_calls)
@@ -149,8 +149,8 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
                 message="Your request has been processed, please log in to view the status.",  # noqa  # pylint: disable=line-too-long
                 obj=review,
                 cc_list=None,
-                template="generic",
-                template_path="model_reviews/email",
+                template="leave",
+                template_path="small_small_hr/email",
             )
         )
         mock.assert_has_calls(expected_calls)
