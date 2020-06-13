@@ -2,7 +2,6 @@
 # pylint: disable=too-many-lines
 import os
 from datetime import date, datetime, timedelta
-from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
@@ -121,8 +120,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             "Free Day with this Date already exists.", form2.errors["date"][0]
         )
 
-    @patch("small_small_hr.forms.overtime_application_email")
-    def test_overtime_form_apply(self, mock):
+    def test_overtime_form_apply(self):
         """Test OverTimeForm."""
         user = mommy.make("auth.User", first_name="Bob", last_name="Ndoe")
         staffprofile = mommy.make("small_small_hr.StaffProfile", user=user)
@@ -155,7 +153,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         )
         self.assertEqual("Extra work", overtime.review_reason)
         self.assertEqual(OverTime.PENDING, overtime.review_status)
-        mock.assert_called_with(overtime_obj=overtime)
 
     def test_overtime_form_apply_no_overlap(self):
         """Test no overlaps on OverTime."""
@@ -309,8 +306,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual("end must be greater than start", form.errors["end"][0])
 
     @override_settings(SSHR_DEFAULT_TIME=7)
-    @patch("small_small_hr.forms.leave_application_email")
-    def test_leaveform_apply(self, mock):
+    def test_leaveform_apply(self):
         """Test LeaveForm apply for leave."""
         user = mommy.make("auth.User", first_name="Bob", last_name="Ndoe")
         staffprofile = mommy.make("small_small_hr.StaffProfile", user=user)
@@ -352,7 +348,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(timedelta(days=5).days, (leave.end - leave.start).days)
         self.assertEqual("Need a break", leave.review_reason)
         self.assertEqual(Leave.PENDING, leave.review_status)
-        mock.assert_called_with(leave_obj=leave)
 
     @override_settings(
         SSHR_DEFAULT_TIME=7,
@@ -367,8 +362,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             7: 1,  # Sunday
         },
     )
-    @patch("small_small_hr.forms.leave_application_email")
-    def test_leave_oversubscribe(self, mock):
+    def test_leave_oversubscribe(self):
         """Test leave oversubscribe works as expected."""
         user = mommy.make("auth.User", first_name="Bob", last_name="Ndoe")
         staffprofile = mommy.make("small_small_hr.StaffProfile", user=user)
@@ -418,7 +412,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(timedelta(days=39).days, (leave.end - leave.start).days)
         self.assertEqual("Mini retirement", leave.review_reason)
         self.assertEqual(Leave.APPROVED, leave.review_status)
-        mock.assert_called_with(leave_obj=leave)
         self.assertEqual(
             40,
             get_taken_leave_days(
@@ -440,11 +433,8 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             7: 1,  # Sunday
         },
     )
-    @patch("small_small_hr.forms.leave_application_email")
-    def test_leave_oversubscribe_off(self, mock):
+    def test_leave_oversubscribe_off(self):
         """Test leave oversubscribe when SSHR_ALLOW_OVERSUBSCRIBE is False."""
-        mock.return_value = None
-
         user = mommy.make("auth.User", first_name="Bob", last_name="Ndoe")
         staffprofile = mommy.make("small_small_hr.StaffProfile", user=user)
         staffprofile.leave_days = 21
@@ -488,8 +478,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         )
 
     @override_settings(SSHR_DEFAULT_TIME=7)
-    @patch("small_small_hr.forms.leave_application_email")
-    def test_one_day_leave(self, mock):
+    def test_one_day_leave(self):
         """Test application for one day leave."""
         user = mommy.make("auth.User", first_name="Bob", last_name="Ndoe")
         staffprofile = mommy.make("small_small_hr.StaffProfile", user=user)
@@ -531,7 +520,6 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(timedelta(days=0).days, (leave.end - leave.start).days)
         self.assertEqual("Need a break", leave.review_reason)
         self.assertEqual(Leave.PENDING, leave.review_status)
-        mock.assert_called_with(leave_obj=leave)
         self.assertEqual(
             1,
             get_taken_leave_days(
