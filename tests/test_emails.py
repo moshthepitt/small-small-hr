@@ -2,12 +2,15 @@
 from datetime import datetime
 
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core import mail
 from django.test import override_settings
 
 import pytz
 from freezegun import freeze_time
 from model_mommy import mommy
+from model_reviews.forms import PerformReview
+from model_reviews.models import ModelReview, Reviewer
 from snapshottest.django import TestCase
 
 from small_small_hr.forms import ApplyLeaveForm
@@ -64,8 +67,42 @@ class TestEmails(TestCase):
         self.assertEqual(["Mother Hen <hr@example.com>"], mail.outbox[0].to)
         self.assertMatchSnapshot(mail.outbox[0].body)
         self.assertMatchSnapshot(mail.outbox[0].alternatives[0][0])
-        # import ipdb; ipdb.set_trace()
-        # leave = form.save()
-        # obj_type = ContentType.objects.get_for_model(leave)
-        # review = ModelReview.objects.get(content_type=obj_type, object_id=leave.id)
-        # reviewer = Reviewer.objects.get(review=review, user=self.boss)
+
+        leave = form.save()
+        obj_type = ContentType.objects.get_for_model(leave)
+        review = ModelReview.objects.get(content_type=obj_type, object_id=leave.id)
+        reviewer = Reviewer.objects.get(review=review, user=self.boss)
+
+        # approve the review
+        data = {
+            "review": review.pk,
+            "reviewer": reviewer.pk,
+            "review_status": ModelReview.APPROVED,
+        }
+        form = PerformReview(data=data)
+        self.assertTrue(form.is_valid())
+        form.save()
+        self.assertEqual(
+            "Your time off request of 05 Jun - 10 Jun has a response",
+            mail.outbox[1].subject,
+        )
+        self.assertEqual(["Mosh Pitt <bob@example.com>"], mail.outbox[1].to)
+        self.assertMatchSnapshot(mail.outbox[1].body)
+        self.assertMatchSnapshot(mail.outbox[1].alternatives[0][0])
+
+        # then reject it
+        data = {
+            "review": review.pk,
+            "reviewer": reviewer.pk,
+            "review_status": ModelReview.REJECTED,
+        }
+        form = PerformReview(data=data)
+        self.assertTrue(form.is_valid())
+        form.save()
+        self.assertEqual(
+            "Your time off request of 05 Jun - 10 Jun has a response",
+            mail.outbox[2].subject,
+        )
+        self.assertEqual(["Mosh Pitt <bob@example.com>"], mail.outbox[2].to)
+        self.assertMatchSnapshot(mail.outbox[2].body)
+        self.assertMatchSnapshot(mail.outbox[2].alternatives[0][0])
