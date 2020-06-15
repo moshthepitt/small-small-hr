@@ -1,1 +1,1 @@
-{{subject}}
+{{ object.content_object.staff.get_name }} requested time off on {{ object.content_object.start|date:"d M" }} to {{ object.content_object.end|date:"d M" }}
