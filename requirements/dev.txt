@@ -6,12 +6,12 @@
 #
 
 appdirs==1.4.4            # via black, virtualenv
-asgiref==3.2.7            # via django
-astroid==2.4.1            # via pylint
+asgiref==3.2.8            # via django
+astroid==2.4.2            # via pylint
 attrs==19.3.0             # via black
 autopep8==1.5.3
 babel==2.8.0              # via django-phonenumber-field
-backcall==0.1.0           # via ipython
+backcall==0.2.0           # via ipython
 black==19.10b0
 cfgv==3.1.0               # via pre-commit
 click==7.1.2              # via black
@@ -28,11 +28,12 @@ django-phonenumber-field==4.0.0
 django-private-storage==2.2.2
 django==3.0.7             # via django-braces, django-contrib-comments, django-model-reviews, django-mptt, django-phonenumber-field, djangorestframework, model-mommy
 djangorestframework==3.11.0
+fastdiff==0.2.0           # via snapshottest
 filelock==3.0.12          # via tox, virtualenv
-flake8==3.8.2
+flake8==3.8.3
 identify==1.4.19          # via pre-commit
 importlib-metadata==1.6.1  # via flake8, importlib-resources, pluggy, pre-commit, tox, virtualenv
-importlib-resources==1.5.0  # via pre-commit, virtualenv
+importlib-resources==2.0.1  # via pre-commit, virtualenv
 ipdb==0.13.2
 ipython-genutils==0.2.0   # via traitlets
 ipython==7.15.0           # via ipdb
@@ -53,35 +54,38 @@ phonenumberslite==8.12.5
 pickleshare==0.7.5        # via ipython
 pillow==7.1.2
 pluggy==0.13.1            # via tox
-pre-commit==2.4.0
+pre-commit==2.5.1
 prompt-toolkit==3.0.5     # via ipython
 psycopg2-binary==2.8.5
 ptyprocess==0.6.0         # via pexpect
-py==1.8.1                 # via tox
+py==1.8.2                 # via tox
 pycodestyle==2.6.0
 pydocstyle==5.0.2
 pyflakes==2.2.0           # via flake8
 pygments==2.6.1           # via ipython
 pylint-django==2.0.15
 pylint-plugin-utils==0.6  # via pylint-django
-pylint==2.5.2
+pylint==2.5.3
 pyparsing==2.4.7          # via packaging
 pytz==2020.1              # via babel, django
 pyyaml==5.3.1             # via pre-commit
-regex==2020.6.7           # via black
-six==1.15.0               # via astroid, django-braces, django-contrib-comments, packaging, tox, traitlets, virtualenv
+regex==2020.6.8           # via black
+six==1.15.0               # via astroid, django-braces, django-contrib-comments, packaging, snapshottest, tox, traitlets, virtualenv
+snapshottest==0.5.1
 snowballstemmer==2.0.0    # via pydocstyle
 sorl-thumbnail==12.6.3
 sqlparse==0.3.1           # via django
 tblib==1.6.0
+termcolor==1.1.0          # via snapshottest
 toml==0.10.1              # via autopep8, black, pre-commit, pylint, tox
 tox==3.15.2
 traitlets==4.3.3          # via ipython
 typed-ast==1.4.1          # via astroid, black, mypy
 typing-extensions==3.7.4.2  # via mypy
-virtualenv==20.0.21       # via pre-commit, tox
+virtualenv==20.0.23       # via pre-commit, tox
 voluptuous==0.11.7
-wcwidth==0.2.3            # via prompt-toolkit
+wasmer==0.4.1             # via fastdiff
+wcwidth==0.2.4            # via prompt-toolkit
 wrapt==1.12.1             # via astroid
 yapf==0.30.0
 zipp==3.1.0               # via importlib-metadata, importlib-resources
