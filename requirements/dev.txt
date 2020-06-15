@@ -31,6 +31,7 @@ djangorestframework==3.11.0
 fastdiff==0.2.0           # via snapshottest
 filelock==3.0.12          # via tox, virtualenv
 flake8==3.8.3
+freezegun==0.3.15
 identify==1.4.19          # via pre-commit
 importlib-metadata==1.6.1  # via flake8, importlib-resources, pluggy, pre-commit, tox, virtualenv
 importlib-resources==2.0.1  # via pre-commit, virtualenv
@@ -67,10 +68,11 @@ pylint-django==2.0.15
 pylint-plugin-utils==0.6  # via pylint-django
 pylint==2.5.3
 pyparsing==2.4.7          # via packaging
+python-dateutil==2.8.1    # via freezegun
 pytz==2020.1              # via babel, django
 pyyaml==5.3.1             # via pre-commit
 regex==2020.6.8           # via black
-six==1.15.0               # via astroid, django-braces, django-contrib-comments, packaging, snapshottest, tox, traitlets, virtualenv
+six==1.15.0               # via astroid, django-braces, django-contrib-comments, freezegun, packaging, python-dateutil, snapshottest, tox, traitlets, virtualenv
 snapshottest==0.5.1
 snowballstemmer==2.0.0    # via pydocstyle
 sorl-thumbnail==12.6.3
