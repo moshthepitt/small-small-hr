@@ -1,1 +1,1 @@
-{{subject}}
+Your time off request of {{ object.content_object.start|date:"d M" }} - {{ object.content_object.end|date:"d M" }} has a response
