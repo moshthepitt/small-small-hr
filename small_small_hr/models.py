@@ -8,6 +8,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext as _
 
 from model_reviews.models import AbstractReview
@@ -161,45 +162,50 @@ class StaffProfile(TimeStampedModel, MPTTModel):
         # pylint: disable=no-member
         return f"{self.user.first_name} {self.user.last_name}"
 
-    def get_approved_leave_days(self, year: int = datetime.today().year):
+    @cached_property
+    def _current_year(self):  # pylint: disable=no-self-use
+        """Get the current year."""
+        return datetime.today().year
+
+    def get_approved_leave_days(self, year: Optional[int] = None):
         """Get approved leave days in the current year."""
         # pylint: disable=no-member
         return get_taken_leave_days(
             staffprofile=self,
             status=Leave.APPROVED,
             leave_type=Leave.REGULAR,
-            start_year=year,
-            end_year=year,
+            start_year=year or self._current_year,
+            end_year=year or self._current_year,
         )
 
-    def get_approved_sick_days(self, year: int = datetime.today().year):
+    def get_approved_sick_days(self, year: Optional[int] = None):
         """Get approved leave days in the current year."""
         return get_taken_leave_days(
             staffprofile=self,
             status=Leave.APPROVED,
             leave_type=Leave.SICK,
-            start_year=year,
-            end_year=year,
+            start_year=year or self._current_year,
+            end_year=year or self._current_year,
         )
 
-    def get_available_leave_days(self, year: int = datetime.today().year):
+    def get_available_leave_days(self, year: Optional[int] = None):
         """Get available leave days."""
         try:
             # pylint: disable=no-member
             leave_record = AnnualLeave.objects.get(
-                leave_type=Leave.REGULAR, staff=self, year=year
+                leave_type=Leave.REGULAR, staff=self, year=year or self._current_year
             )
         except AnnualLeave.DoesNotExist:
             return Decimal(0)
         else:
             return leave_record.get_available_leave_days()
 
-    def get_available_sick_days(self, year: int = datetime.today().year):
+    def get_available_sick_days(self, year: Optional[int] = None):
         """Get available sick days."""
         try:
             # pylint: disable=no-member
             leave_record = AnnualLeave.objects.get(
-                leave_type=Leave.SICK, staff=self, year=year
+                leave_type=Leave.SICK, staff=self, year=year or self._current_year
             )
         except AnnualLeave.DoesNotExist:
             return Decimal(0)
@@ -332,6 +338,15 @@ class Leave(BaseStaffRequest):
         # pylint: disable=no-member
         return _(f"{self.staff.get_name()}: {self.start} to {self.end}")
 
+    def get_duration(self):
+        """Get duration."""
+        return self.end - self.start
+
+    @cached_property
+    def duration(self):
+        """Get duration as a property."""
+        return self.get_duration()
+
 
 class OverTime(BaseStaffRequest):
     """Overtime model class."""
@@ -371,6 +386,11 @@ class OverTime(BaseStaffRequest):
         start = datetime.combine(self.date, self.start)
         end = datetime.combine(self.date, self.end)
         return end - start
+
+    @cached_property
+    def duration(self):
+        """Get duration as a property."""
+        return self.get_duration()
 
 
 class AnnualLeave(TimeStampedModel, models.Model):
