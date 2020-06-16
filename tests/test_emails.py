@@ -13,7 +13,7 @@ from model_reviews.forms import PerformReview
 from model_reviews.models import ModelReview, Reviewer
 from snapshottest.django import TestCase
 
-from small_small_hr.forms import ApplyLeaveForm
+from small_small_hr.forms import ApplyLeaveForm, ApplyOverTimeForm
 from small_small_hr.models import Leave, StaffProfile
 from small_small_hr.utils import create_annual_leave
 
@@ -60,18 +60,27 @@ class TestEmails(TestCase):
         }
         form = ApplyLeaveForm(data=data)
         self.assertTrue(form.is_valid())
-        form.save()
+        leave = form.save()
+
+        obj_type = ContentType.objects.get_for_model(leave)
+        # Hard code the pk for the snapshot test
+        # empty the test outbox so that we don't deal with the old review's emails
+        mail.outbox = []
+        ModelReview.objects.get(content_type=obj_type, object_id=leave.id).delete()
+        review = mommy.make(
+            "model_reviews.ModelReview",
+            content_type=obj_type,
+            object_id=leave.id,
+            id=1338,
+        )
+        reviewer = Reviewer.objects.get(review=review, user=self.boss)
+
         self.assertEqual(
             "Mosh Pitt requested time off on 05 Jun to 10 Jun", mail.outbox[0].subject
         )
         self.assertEqual(["Mother Hen <hr@example.com>"], mail.outbox[0].to)
         self.assertMatchSnapshot(mail.outbox[0].body)
         self.assertMatchSnapshot(mail.outbox[0].alternatives[0][0])
-
-        leave = form.save()
-        obj_type = ContentType.objects.get_for_model(leave)
-        review = ModelReview.objects.get(content_type=obj_type, object_id=leave.id)
-        reviewer = Reviewer.objects.get(review=review, user=self.boss)
 
         # approve the review
         data = {
@@ -102,6 +111,78 @@ class TestEmails(TestCase):
         self.assertEqual(
             "Your time off request of 05 Jun - 10 Jun has a response",
             mail.outbox[2].subject,
+        )
+        self.assertEqual(["Mosh Pitt <bob@example.com>"], mail.outbox[2].to)
+        self.assertMatchSnapshot(mail.outbox[2].body)
+        self.assertMatchSnapshot(mail.outbox[2].alternatives[0][0])
+
+    def test_overtime_emails(self):
+        """Test Overtime emails."""
+        # apply for overtime
+        start = datetime(
+            2017, 6, 5, 16, 45, 0, tzinfo=pytz.timezone(settings.TIME_ZONE)
+        )
+        end = datetime(2017, 6, 5, 21, 30, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+
+        data = {
+            "staff": self.staffprofile.id,
+            "date": start.date(),
+            "start": start.time(),
+            "end": end.time(),
+            "review_reason": "Extra work",
+        }
+
+        form = ApplyOverTimeForm(data=data)
+        self.assertTrue(form.is_valid())
+        overtime = form.save()
+
+        obj_type = ContentType.objects.get_for_model(overtime)
+        # Hard code the pk for the snapshot test
+        # empty the test outbox so that we don't deal with the old review's emails
+        mail.outbox = []
+        ModelReview.objects.get(content_type=obj_type, object_id=overtime.id).delete()
+        review = mommy.make(
+            "model_reviews.ModelReview",
+            content_type=obj_type,
+            object_id=overtime.id,
+            id=1337,
+        )
+        reviewer = Reviewer.objects.get(review=review, user=self.boss)
+
+        self.assertEqual(
+            "Mosh Pitt requested overtime on 05 Jun", mail.outbox[0].subject
+        )
+        self.assertEqual(["Mother Hen <hr@example.com>"], mail.outbox[0].to)
+        self.assertMatchSnapshot(mail.outbox[0].body)
+        self.assertMatchSnapshot(mail.outbox[0].alternatives[0][0])
+
+        # approve the overtime
+        data = {
+            "review": review.pk,
+            "reviewer": reviewer.pk,
+            "review_status": ModelReview.APPROVED,
+        }
+        form = PerformReview(data=data)
+        self.assertTrue(form.is_valid())
+        form.save()
+        self.assertEqual(
+            "Your overtime request of 05 Jun has a response", mail.outbox[1].subject,
+        )
+        self.assertEqual(["Mosh Pitt <bob@example.com>"], mail.outbox[1].to)
+        self.assertMatchSnapshot(mail.outbox[1].body)
+        self.assertMatchSnapshot(mail.outbox[1].alternatives[0][0])
+
+        # then reject it
+        data = {
+            "review": review.pk,
+            "reviewer": reviewer.pk,
+            "review_status": ModelReview.REJECTED,
+        }
+        form = PerformReview(data=data)
+        self.assertTrue(form.is_valid())
+        form.save()
+        self.assertEqual(
+            "Your overtime request of 05 Jun has a response", mail.outbox[2].subject,
         )
         self.assertEqual(["Mosh Pitt <bob@example.com>"], mail.outbox[2].to)
         self.assertMatchSnapshot(mail.outbox[2].body)
