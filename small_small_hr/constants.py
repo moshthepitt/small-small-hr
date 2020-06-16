@@ -1,4 +1,6 @@
 """Constants."""
+HOURS = "hours"
+MINUTES = "minutes"
 STAFF = "staff"
 OVERTIME_APPLICATION_EMAIL_TEMPLATE = "overtime_application"
 OVERTIME_COMPLETED_EMAIL_TEMPLATE = "overtime_completed"
