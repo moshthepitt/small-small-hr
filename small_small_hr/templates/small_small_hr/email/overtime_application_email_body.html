@@ -1,5 +1,7 @@
-Hello,<br/><br/>
-{{message|linebreaks}}
+{% load small_small_hr %}{{ object.content_object.staff.get_name }} requested overtime:<br /><br />
+{{ object.content_object.duration|overtime_duration }} on {{ object.content_object.date|date:"D, d M Y" }}<br />
+{{ object.content_object.start|date:"P" }} - {{ object.content_object.end|date:"P" }}<br /><br />
+Please log in to process the above: http://{{SITE.name}}/reviews/{{ object.pk }}
 <br/><br/>
 Thank you,<br/>
 {{SITE.name}}<br/>
