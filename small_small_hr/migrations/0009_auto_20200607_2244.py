@@ -16,19 +16,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="staffprofile",
             name="level",
-            field=models.PositiveIntegerField(default=0, editable=False),
+            field=models.PositiveIntegerField(default=1, editable=False),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name="staffprofile",
             name="lft",
-            field=models.PositiveIntegerField(default=0, editable=False),
+            field=models.PositiveIntegerField(default=1, editable=False),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name="staffprofile",
             name="rght",
-            field=models.PositiveIntegerField(default=0, editable=False),
+            field=models.PositiveIntegerField(default=1, editable=False),
             preserve_default=False,
         ),
         migrations.AddField(
