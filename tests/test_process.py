@@ -8,6 +8,7 @@ from django.test import RequestFactory, TestCase
 
 import pytz
 from model_mommy import mommy
+from model_mommy.recipe import Recipe
 from model_reviews.forms import PerformReview
 from model_reviews.models import ModelReview, Reviewer
 
@@ -28,18 +29,28 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
         )
         self.boss.groups.add(hr_group)
 
+        self.manager = mommy.make(
+            "auth.User", first_name="Jane", last_name="Ndoe", email="jane@example.com"
+        )
+        self.user = mommy.make(
+            "auth.User", first_name="Bob", last_name="Ndoe", email="bob@example.com"
+        )
+
+        manager_mommy = Recipe(StaffProfile, lft=None, rght=None, user=self.manager)
+
+        staff_mommy = Recipe(StaffProfile, lft=None, rght=None, user=self.user)
+
+        self.manager_profile = manager_mommy.make()
+
+        self.staffprofile = staff_mommy.make()
+
     @patch("small_small_hr.emails.send_email")
     def test_leave_review_process(self, mock):  # pylint: disable=too-many-locals
         """Test the Leave review process."""
-        manager = mommy.make(
-            "auth.User", first_name="Jane", last_name="Ndoe", email="jane@example.com"
-        )
-        manager_profile = mommy.make("small_small_hr.StaffProfile", user=manager)
+        manager = self.manager
+        manager_profile = self.manager_profile
 
-        user = mommy.make(
-            "auth.User", first_name="Bob", last_name="Ndoe", email="bob@example.com"
-        )
-        staffprofile = mommy.make("small_small_hr.StaffProfile", user=user)
+        staffprofile = self.staffprofile
         staffprofile.supervisor = manager_profile
         staffprofile.leave_days = 21
         staffprofile.sick_days = 10
@@ -160,15 +171,10 @@ class TestProcess(TestCase):  # pylint: disable=too-many-public-methods
     @patch("small_small_hr.emails.send_email")
     def test_overtime_review_process(self, mock):  # pylint: disable=too-many-locals
         """Test the OverTime review process."""
-        manager = mommy.make(
-            "auth.User", first_name="Jane", last_name="Ndoe", email="jane@example.com"
-        )
-        manager_profile = mommy.make("small_small_hr.StaffProfile", user=manager)
+        manager = self.manager
+        manager_profile = self.manager_profile
 
-        user = mommy.make(
-            "auth.User", first_name="Bob", last_name="Ndoe", email="bob@example.com"
-        )
-        staffprofile = mommy.make("small_small_hr.StaffProfile", user=user)
+        staffprofile = self.staffprofile
         staffprofile.supervisor = manager_profile
         staffprofile.save()
 
