@@ -6,7 +6,7 @@
 #
 
 appdirs==1.4.4            # via black, virtualenv
-asgiref==3.2.8            # via django
+asgiref==3.2.10           # via django
 astroid==2.4.2            # via pylint
 attrs==19.3.0             # via black
 autopep8==1.5.3
@@ -32,26 +32,26 @@ fastdiff==0.2.0           # via snapshottest
 filelock==3.0.12          # via tox, virtualenv
 flake8==3.8.3
 freezegun==0.3.15
-identify==1.4.19          # via pre-commit
+identify==1.4.20          # via pre-commit
 importlib-metadata==1.6.1  # via flake8, importlib-resources, pluggy, pre-commit, tox, virtualenv
 importlib-resources==2.0.1  # via pre-commit, virtualenv
-ipdb==0.13.2
+ipdb==0.13.3
 ipython-genutils==0.2.0   # via traitlets
 ipython==7.15.0           # via ipdb
 isort==4.3.21
-jedi==0.17.0              # via ipython
+jedi==0.17.1              # via ipython
 lazy-object-proxy==1.4.3  # via astroid
 mccabe==0.6.1             # via flake8, pylint
 model-mommy==2.0.0
 mypy-extensions==0.4.3    # via mypy
-mypy==0.780
+mypy==0.782
 nodeenv==1.4.0            # via pre-commit
 packaging==20.4           # via tox
 parso==0.7.0              # via jedi
 pathspec==0.8.0           # via black
 pep8==1.7.1
 pexpect==4.8.0            # via ipython
-phonenumberslite==8.12.5
+phonenumberslite==8.12.6
 pickleshare==0.7.5        # via ipython
 pillow==7.1.2
 pluggy==0.13.1            # via tox
@@ -84,10 +84,10 @@ tox==3.15.2
 traitlets==4.3.3          # via ipython
 typed-ast==1.4.1          # via astroid, black, mypy
 typing-extensions==3.7.4.2  # via mypy
-virtualenv==20.0.23       # via pre-commit, tox
+virtualenv==20.0.25       # via pre-commit, tox
 voluptuous==0.11.7
 wasmer==0.4.1             # via fastdiff
-wcwidth==0.2.4            # via prompt-toolkit
+wcwidth==0.2.5            # via prompt-toolkit
 wrapt==1.12.1             # via astroid
 yapf==0.30.0
 zipp==3.1.0               # via importlib-metadata, importlib-resources
