@@ -21,7 +21,7 @@ setup(
     author="Kelvin Jayanoris",
     author_email="kelvin@jayanoris.com",
     url="https://github.com/moshthepitt/small-small-hr",
-    packages=find_packages(exclude=["docs", "tests"]),
+    packages=find_packages(exclude=["docs", "*.egg-info", "build", "tests.*", "tests"]),
     install_requires=[
         "Django >= 2.2",
         "voluptuous",
