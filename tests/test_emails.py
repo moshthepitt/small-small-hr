@@ -1,286 +1,189 @@
-"""
-Module to test small_small_hr Emails
-"""
+"""Module to test small_small_hr Emails."""
 from datetime import datetime
-from unittest.mock import call, patch
 
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core import mail
-from django.test import TestCase, override_settings
+from django.test import override_settings
 
 import pytz
+from freezegun import freeze_time
 from model_mommy import mommy
+from model_reviews.forms import PerformReview
+from model_reviews.models import ModelReview, Reviewer
+from snapshottest.django import TestCase
 
-from small_small_hr.emails import (leave_application_email,
-                                   leave_processed_email,
-                                   overtime_application_email,
-                                   overtime_processed_email, send_email)
-from small_small_hr.models import Leave, OverTime
+from small_small_hr.forms import ApplyLeaveForm, ApplyOverTimeForm
+from small_small_hr.models import Leave, StaffProfile
+from small_small_hr.utils import create_annual_leave
 
 
-@override_settings(
-    SSHR_ADMIN_EMAILS=["admin@example.com"],
-    SSHR_ADMIN_LEAVE_EMAILS=["hr@example.com"],
-    SSHR_ADMIN_OVERTIME_EMAILS=["ot@example.com"],
-    SSHR_ADMIN_NAME="mosh"
-)
+@override_settings(ROOT_URLCONF="tests.urls")
 class TestEmails(TestCase):
-    """
-    Test class for emails
-    """
+    """Test class for emails."""
+
+    maxDiff = None
 
     def setUp(self):
-        """
-        Set up
-        """
+        """Set up."""
         self.user = mommy.make(
-            'auth.User', first_name='Bob', last_name='Ndoe',
-            email="bob@example.com")
-        self.staffprofile = mommy.make(
-            'small_small_hr.StaffProfile', user=self.user)
-
-    @patch('small_small_hr.emails.send_email')
-    def test_leave_application_email(self, mock):
-        """
-        Test leave_application_email
-        """
-        start = datetime(
-            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
-        end = datetime(
-            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
-        leave = mommy.make(
-            'small_small_hr.Leave', staff=self.staffprofile, start=start,
-            end=end, leave_type=Leave.SICK,
-            status=Leave.PENDING)
-
-        leave_application_email(leave)
-
-        mock.assert_called_with(
-            name="mosh",
-            email="hr@example.com",
-            subject="New Leave Application",
-            message="There has been a new leave application.  Please log in to process it.",  # noqa
-            obj=leave,
-            template="leave_application",
+            "auth.User", first_name="Mosh", last_name="Pitt", email="bob@example.com"
         )
+        self.staffprofile = mommy.make("small_small_hr.StaffProfile", user=self.user)
+        self.staffprofile.leave_days = 17
+        self.staffprofile.sick_days = 9
+        self.staffprofile.save()
+        self.staffprofile.refresh_from_db()
 
-    @patch('small_small_hr.emails.send_email')
-    def test_leave_processed_email(self, mock):
-        """
-        Test leave_processed_email
-        """
-        start = datetime(
-            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
-        end = datetime(
-            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
-        leave = mommy.make(
-            'small_small_hr.Leave', staff=self.staffprofile, start=start,
-            end=end, leave_type=Leave.SICK,
-            status=Leave.APPROVED)
+        create_annual_leave(self.staffprofile, 2017, Leave.REGULAR)
 
-        leave_processed_email(leave)
+        StaffProfile.objects.rebuild()
 
-        mock.assert_called_with(
-            name="Bob Ndoe",
-            email="bob@example.com",
-            subject="Your leave application has been processed",
-            message="You leave application status is Approved.  Log in for more info.",  # noqa
-            obj=leave,
-            cc_list=['hr@example.com']
+        hr_group = mommy.make("auth.Group", name=settings.SSHR_ADMIN_USER_GROUP_NAME)
+        self.boss = mommy.make(
+            "auth.User", first_name="Mother", last_name="Hen", email="hr@example.com"
         )
+        self.boss.groups.add(hr_group)
 
-    @patch('small_small_hr.emails.send_email')
-    def test_overtime_application_email(self, mock):
-        """
-        Test overtime_application_email
-        """
-        start = datetime(
-            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
-        end = datetime(
-            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
-        overtime = mommy.make(
-            'small_small_hr.OverTime', staff=self.staffprofile, start=start,
-            end=end, status=OverTime.PENDING)
+    @freeze_time("June 1st, 2017")
+    def test_leave_emails(self):
+        """Test Leave emails."""
+        # apply for leave
+        start = datetime(2017, 6, 5, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(2017, 6, 10, 7, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        data = {
+            "staff": self.staffprofile.id,
+            "leave_type": Leave.REGULAR,
+            "start": start,
+            "end": end,
+            "review_reason": "Need a break",
+        }
+        form = ApplyLeaveForm(data=data)
+        self.assertTrue(form.is_valid())
+        leave = form.save()
 
-        overtime_application_email(overtime)
-
-        mock.assert_called_with(
-            name="mosh",
-            email="ot@example.com",
-            subject="New Overtime Application",
-            message="There has been a new overtime application.  Please log in to process it.",  # noqa
-            obj=overtime,
-            template="overtime_application",
+        obj_type = ContentType.objects.get_for_model(leave)
+        # Hard code the pk for the snapshot test
+        # empty the test outbox so that we don't deal with the old review's emails
+        mail.outbox = []
+        ModelReview.objects.get(content_type=obj_type, object_id=leave.id).delete()
+        review = mommy.make(
+            "model_reviews.ModelReview",
+            content_type=obj_type,
+            object_id=leave.id,
+            id=1338,
         )
+        reviewer = Reviewer.objects.get(review=review, user=self.boss)
 
-    @patch('small_small_hr.emails.send_email')
-    def test_overtime_processed_email(self, mock):
-        """
-        Test overtime_processed_email
-        """
-        start = datetime(
-            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
-        end = datetime(
-            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
-        overtime = mommy.make(
-            'small_small_hr.OverTime', staff=self.staffprofile, start=start,
-            end=end, status=OverTime.REJECTED)
-
-        overtime_processed_email(overtime)
-
-        mock.assert_called_with(
-            name="Bob Ndoe",
-            email="bob@example.com",
-            subject="Your overtime application has been processed",
-            message="You overtime application status is Rejected.  Log in for more info.",  # noqa
-            obj=overtime,
-            cc_list=['ot@example.com']
+        self.assertEqual(
+            "Mosh Pitt requested time off on 05 Jun to 10 Jun", mail.outbox[0].subject
         )
+        self.assertEqual(["Mother Hen <hr@example.com>"], mail.outbox[0].to)
+        self.assertMatchSnapshot(mail.outbox[0].body)
+        self.assertMatchSnapshot(mail.outbox[0].alternatives[0][0])
 
-    def test_send_email(self):
-        """
-        Test send_email
-        """
+        # approve the review
+        data = {
+            "review": review.pk,
+            "reviewer": reviewer.pk,
+            "review_status": ModelReview.APPROVED,
+        }
+        form = PerformReview(data=data)
+        self.assertTrue(form.is_valid())
+        form.save()
+        self.assertEqual(
+            "Your time off request of 05 Jun - 10 Jun has a response",
+            mail.outbox[1].subject,
+        )
+        self.assertEqual(["Mosh Pitt <bob@example.com>"], mail.outbox[1].to)
+        self.assertMatchSnapshot(mail.outbox[1].body)
+        self.assertMatchSnapshot(mail.outbox[1].alternatives[0][0])
 
-        message = "The quick brown fox."
+        # then reject it
+        data = {
+            "review": review.pk,
+            "reviewer": reviewer.pk,
+            "review_status": ModelReview.REJECTED,
+        }
+        form = PerformReview(data=data)
+        self.assertTrue(form.is_valid())
+        form.save()
+        self.assertEqual(
+            "Your time off request of 05 Jun - 10 Jun has a response",
+            mail.outbox[2].subject,
+        )
+        self.assertEqual(["Mosh Pitt <bob@example.com>"], mail.outbox[2].to)
+        self.assertMatchSnapshot(mail.outbox[2].body)
+        self.assertMatchSnapshot(mail.outbox[2].alternatives[0][0])
+
+    def test_overtime_emails(self):
+        """Test Overtime emails."""
+        # apply for overtime
+        start = datetime(
+            2017, 6, 5, 16, 45, 0, tzinfo=pytz.timezone(settings.TIME_ZONE)
+        )
+        end = datetime(2017, 6, 5, 21, 30, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
 
         data = {
-            'name': 'Bob Munro',
-            'email': 'bob@example.com',
-            'subject': "I love oov",
-            'message': message,
-            'cc_list': settings.SSHR_ADMIN_EMAILS
+            "staff": self.staffprofile.id,
+            "date": start.date(),
+            "start": start.time(),
+            "end": end.time(),
+            "review_reason": "Extra work",
         }
 
-        send_email(**data)
+        form = ApplyOverTimeForm(data=data)
+        self.assertTrue(form.is_valid())
+        overtime = form.save()
 
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].subject, 'I love oov')
-        self.assertEqual(mail.outbox[0].to, ['Bob Munro <bob@example.com>'])
-        self.assertEqual(mail.outbox[0].cc, ['admin@example.com'])
+        obj_type = ContentType.objects.get_for_model(overtime)
+        # Hard code the pk for the snapshot test
+        # empty the test outbox so that we don't deal with the old review's emails
+        mail.outbox = []
+        ModelReview.objects.get(content_type=obj_type, object_id=overtime.id).delete()
+        review = mommy.make(
+            "model_reviews.ModelReview",
+            content_type=obj_type,
+            object_id=overtime.id,
+            id=1337,
+        )
+        reviewer = Reviewer.objects.get(review=review, user=self.boss)
+
         self.assertEqual(
-            mail.outbox[0].body,
-            'Hello Bob Munro,\n\nThe quick brown fox.\n\nThank you,\n\n'
-            'example.com\n------\nhttp://example.com\n')
-        self.assertEqual(
-            mail.outbox[0].alternatives[0][0],
-            'Hello Bob Munro,<br/><br/><p>The quick brown fox.</p><br/><br/>'
-            'Thank you,<br/>example.com<br/>------<br/>http://example.com')
+            "Mosh Pitt requested overtime on 05 Jun", mail.outbox[0].subject
+        )
+        self.assertEqual(["Mother Hen <hr@example.com>"], mail.outbox[0].to)
+        self.assertMatchSnapshot(mail.outbox[0].body)
+        self.assertMatchSnapshot(mail.outbox[0].alternatives[0][0])
 
-    @patch('small_small_hr.emails.Site.objects.get_current')
-    @patch('small_small_hr.emails.render_to_string')
-    def test_send_email_templates(self, mock, site_mock):
-        """
-        Test the templates used with send_email
-        """
-        mock.return_value = "Some random text"
-        site_mock.return_value = 42  # ensure that this is predictable
-
-        # test generic
+        # approve the overtime
         data = {
-            'name': 'Bob Munro',
-            'email': 'bob@example.com',
-            'subject': "I love oov",
-            'message': "Its dangerous",
+            "review": review.pk,
+            "reviewer": reviewer.pk,
+            "review_status": ModelReview.APPROVED,
         }
-
-        send_email(**data)
-
-        context = data.copy()
-        context.pop("email")
-        context["object"] = None
-        context["SITE"] = 42
-
-        expected_calls = [
-            call(
-                "small_small_hr/email/generic_email_subject.txt",
-                context
-            ),
-            call(
-                "small_small_hr/email/generic_email_body.txt",
-                context
-            ),
-            call(
-                "small_small_hr/email/generic_email_body.html",
-                context
-            )
-        ]
-
-        mock.assert_has_calls(expected_calls)
-
-        mock.reset_mock()
-
-        # test leave
-        start = datetime(
-            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
-        end = datetime(
-            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
-        leave = mommy.make(
-            'small_small_hr.Leave', staff=self.staffprofile, start=start,
-            end=end, leave_type=Leave.SICK,
-            status=Leave.PENDING)
-
-        leave_application_email(leave)
-
-        context = dict(
-            name="mosh",
-            subject="New Leave Application",
-            message="There has been a new leave application.  Please log in to process it.",  # noqa
-            object=leave,
-            SITE=42
+        form = PerformReview(data=data)
+        self.assertTrue(form.is_valid())
+        form.save()
+        self.assertEqual(
+            "Your overtime request of 05 Jun has a response", mail.outbox[1].subject,
         )
+        self.assertEqual(["Mosh Pitt <bob@example.com>"], mail.outbox[1].to)
+        self.assertMatchSnapshot(mail.outbox[1].body)
+        self.assertMatchSnapshot(mail.outbox[1].alternatives[0][0])
 
-        expected_calls = [
-            call(
-                "small_small_hr/email/leave_application_email_subject.txt",
-                context
-            ),
-            call(
-                "small_small_hr/email/leave_application_email_body.txt",
-                context
-            ),
-            call(
-                "small_small_hr/email/leave_application_email_body.html",
-                context
-            )
-        ]
-
-        mock.assert_has_calls(expected_calls)
-
-        mock.reset_mock()
-
-        # test overtime
-        start = datetime(
-            2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
-        end = datetime(
-            2017, 6, 10, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
-        overtime = mommy.make(
-            'small_small_hr.OverTime', staff=self.staffprofile, start=start,
-            end=end, status=OverTime.PENDING)
-
-        overtime_application_email(overtime)
-
-        context = dict(
-            name="mosh",
-            subject="New Overtime Application",
-            message="There has been a new overtime application.  Please log in to process it.",  # noqa
-            object=overtime,
-            SITE=42
+        # then reject it
+        data = {
+            "review": review.pk,
+            "reviewer": reviewer.pk,
+            "review_status": ModelReview.REJECTED,
+        }
+        form = PerformReview(data=data)
+        self.assertTrue(form.is_valid())
+        form.save()
+        self.assertEqual(
+            "Your overtime request of 05 Jun has a response", mail.outbox[2].subject,
         )
-
-        expected_calls = [
-            call(
-                "small_small_hr/email/overtime_application_email_subject.txt",
-                context
-            ),
-            call(
-                "small_small_hr/email/overtime_application_email_body.txt",
-                context
-            ),
-            call(
-                "small_small_hr/email/overtime_application_email_body.html",
-                context
-            )
-        ]
-
-        mock.assert_has_calls(expected_calls)
+        self.assertEqual(["Mosh Pitt <bob@example.com>"], mail.outbox[2].to)
+        self.assertMatchSnapshot(mail.outbox[2].body)
+        self.assertMatchSnapshot(mail.outbox[2].alternatives[0][0])

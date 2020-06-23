@@ -1,0 +1,13 @@
+{% load small_small_hr %}{{ object.content_object.staff.get_name }},
+
+Your overtime request for {{ object.content_object.duration|overtime_duration }} has been {{ object.content_object.get_review_status_display|lower }}.
+
+{{ object.content_object.duration|overtime_duration }} on {{ object.content_object.date|date:"D, d M Y" }}
+{{ object.content_object.start|date:"P" }} - {{ object.content_object.end|date:"P" }}
+Status: {{ object.content_object.get_review_status_display }}
+
+Thank you,
+
+{{SITE.name}}
+------
+http://{{SITE.domain}}

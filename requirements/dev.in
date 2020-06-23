@@ -20,3 +20,5 @@ black
 pre-commit
 mypy
 tblib
+snapshottest
+freezegun

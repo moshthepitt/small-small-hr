@@ -16,14 +16,16 @@ SSHR_DAY_LEAVE_VALUES = {
 SSHR_ALLOW_OVERSUBSCRIBE = True  # allow taking more leave days one has
 SSHR_DEFAULT_TIME = 7  # default time of the day for leave
 SSHR_FREE_DAYS = [
-    {'day': 1, 'month': 1},  # New year
-    {'day': 1, 'month': 5},  # labour day
-    {'day': 1, 'month': 6},  # Madaraka day
-    {'day': 20, 'month': 10},  # Mashujaa day
-    {'day': 12, 'month': 12},  # Jamhuri day
-    {'day': 25, 'month': 12},  # Christmas
-    {'day': 26, 'month': 12},  # Boxing day
+    {"day": 1, "month": 1},  # New year
+    {"day": 1, "month": 5},  # labour day
+    {"day": 1, "month": 6},  # Madaraka day
+    {"day": 20, "month": 10},  # Mashujaa day
+    {"day": 12, "month": 12},  # Jamhuri day
+    {"day": 25, "month": 12},  # Christmas
+    {"day": 26, "month": 12},  # Boxing day
 ]  # these are days that are not counted when getting taken leave days
+# admins
+SSHR_ADMIN_USER_GROUP_NAME = "Human Resource"
 # emails
 SSHR_ADMIN_NAME = "HR"
 SSHR_ADMIN_EMAILS = [settings.DEFAULT_FROM_EMAIL]

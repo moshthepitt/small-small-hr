@@ -1,0 +1,15 @@
+{{ object.content_object.staff.get_name }},
+
+Your time off request for {{ object.content_object.duration.days }} days of {{ object.content_object.get_leave_type_display }} from {{ object.content_object.start|date:"d M" }} - {{ object.content_object.end|date:"d M" }} has been {{ object.content_object.get_review_status_display|lower }}.
+
+{{ object.content_object.start|date:"D, d M Y" }} - {{ object.content_object.end|date:"D, d M Y" }}
+{{ object.content_object.get_leave_type_display}}
+{{ object.content_object.duration.days }} days
+Status: {{ object.content_object.get_review_status_display }}
+
+Thank you,
+
+
+{{SITE.name}}
+------
+http://{{SITE.domain}}

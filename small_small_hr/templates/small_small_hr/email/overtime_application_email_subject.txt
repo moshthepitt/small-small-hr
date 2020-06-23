@@ -1,1 +1,1 @@
-{{subject}}
+{{ object.content_object.staff.get_name }} requested overtime on {{ object.content_object.date|date:"d M" }}

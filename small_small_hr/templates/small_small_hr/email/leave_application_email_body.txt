@@ -1,8 +1,13 @@
-Hello,
+{{ object.content_object.staff.get_name }} requested time off:
 
-{{message}}
+{{ object.content_object.duration.days }} days of {{ object.content_object.get_leave_type_display}}
+{{ object.content_object.start|date:"D, d M Y" }} - {{ object.content_object.end|date:"D, d M Y" }}
+Available Balance: {{ object.content_object.staff.get_available_leave_days|floatformat:2 }} days
+
+Please log in to process the above: http://{{SITE.name}}/reviews/{{ object.pk }}
 
 Thank you,
+
 
 {{SITE.name}}
 ------
