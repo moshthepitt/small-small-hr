@@ -22,7 +22,7 @@ django-braces==1.14.0     # via django-model-reviews
 django-contrib-comments==1.9.2  # via django-model-reviews
 django-crispy-forms==1.9.1
 django-js-asset==1.2.2    # via django-mptt
-django-model-reviews==1.0.1
+django-model-reviews==1.0.2
 django-mptt==0.11.0
 django-phonenumber-field==4.0.0
 django-private-storage==2.2.2
