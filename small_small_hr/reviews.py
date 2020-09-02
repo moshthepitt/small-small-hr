@@ -1,6 +1,6 @@
 """Review module for small-small-hr."""
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User  # pylint: disable = imported-auth-user
 from django.db import models
 
 from model_reviews.models import Reviewer

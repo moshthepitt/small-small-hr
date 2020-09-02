@@ -3,7 +3,7 @@ from datetime import datetime, time
 
 from django import forms
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User  # pylint: disable = imported-auth-user
 from django.db.models import Q
 from django.utils.translation import ugettext as _
 
