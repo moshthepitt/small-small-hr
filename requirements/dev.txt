@@ -8,83 +8,82 @@
 appdirs==1.4.4            # via black, virtualenv
 asgiref==3.2.10           # via django
 astroid==2.4.2            # via pylint
-attrs==19.3.0             # via black
-autopep8==1.5.3
-babel==2.8.0              # via django-phonenumber-field
+autopep8==1.5.4
 backcall==0.2.0           # via ipython
-black==19.10b0
-cfgv==3.1.0               # via pre-commit
+black==20.8b1
+cfgv==3.2.0               # via pre-commit
 click==7.1.2              # via black
-coverage==5.1
+coverage==5.2.1
+dataclasses==0.7          # via black
 decorator==4.4.2          # via ipython, traitlets
-distlib==0.3.0            # via virtualenv
+distlib==0.3.1            # via virtualenv
 django-braces==1.14.0     # via django-model-reviews
 django-contrib-comments==1.9.2  # via django-model-reviews
-django-crispy-forms==1.9.1
+django-crispy-forms==1.9.2
 django-js-asset==1.2.2    # via django-mptt
 django-model-reviews==1.0.2
 django-mptt==0.11.0
-django-phonenumber-field==4.0.0
+django-phonenumber-field==5.0.0
 django-private-storage==2.2.2
-django==3.0.7             # via django-braces, django-contrib-comments, django-model-reviews, django-mptt, django-phonenumber-field, djangorestframework, model-mommy
-djangorestframework==3.11.0
+django==3.1.1             # via django-braces, django-contrib-comments, django-model-reviews, django-mptt, django-phonenumber-field, djangorestframework, model-mommy
+djangorestframework==3.11.1
 fastdiff==0.2.0           # via snapshottest
 filelock==3.0.12          # via tox, virtualenv
 flake8==3.8.3
 freezegun==0.3.15
-identify==1.4.20          # via pre-commit
-importlib-metadata==1.6.1  # via flake8, importlib-resources, pluggy, pre-commit, tox, virtualenv
-importlib-resources==2.0.1  # via pre-commit, virtualenv
+identify==1.4.30          # via pre-commit
+importlib-metadata==1.7.0  # via flake8, pluggy, pre-commit, tox, virtualenv
+importlib-resources==3.0.0  # via pre-commit, virtualenv
 ipdb==0.13.3
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.15.0           # via ipdb
-isort==4.3.21
-jedi==0.17.1              # via ipython
+ipython==7.16.1           # via ipdb
+isort==5.4.2
+jedi==0.17.2              # via ipython
 lazy-object-proxy==1.4.3  # via astroid
 mccabe==0.6.1             # via flake8, pylint
 model-mommy==2.0.0
-mypy-extensions==0.4.3    # via mypy
+mypy-extensions==0.4.3    # via black, mypy
 mypy==0.782
-nodeenv==1.4.0            # via pre-commit
+nodeenv==1.5.0            # via pre-commit
 packaging==20.4           # via tox
-parso==0.7.0              # via jedi
+parso==0.7.1              # via jedi
 pathspec==0.8.0           # via black
 pep8==1.7.1
 pexpect==4.8.0            # via ipython
-phonenumberslite==8.12.6
+phonenumberslite==8.12.9
 pickleshare==0.7.5        # via ipython
-pillow==7.1.2
+pillow==7.2.0
 pluggy==0.13.1            # via tox
-pre-commit==2.5.1
-prompt-toolkit==3.0.5     # via ipython
+pre-commit==2.7.1
+prompt-toolkit==3.0.7     # via ipython
 psycopg2-binary==2.8.5
 ptyprocess==0.6.0         # via pexpect
-py==1.8.2                 # via tox
+py==1.9.0                 # via tox
 pycodestyle==2.6.0
-pydocstyle==5.0.2
+pydocstyle==5.1.1
 pyflakes==2.2.0           # via flake8
 pygments==2.6.1           # via ipython
-pylint-django==2.0.15
+pylint-django==2.3.0
 pylint-plugin-utils==0.6  # via pylint-django
-pylint==2.5.3
+pylint==2.6.0
 pyparsing==2.4.7          # via packaging
 python-dateutil==2.8.1    # via freezegun
-pytz==2020.1              # via babel, django
+pytz==2020.1              # via django
 pyyaml==5.3.1             # via pre-commit
-regex==2020.6.8           # via black
+regex==2020.7.14          # via black
 six==1.15.0               # via astroid, django-braces, django-contrib-comments, freezegun, packaging, python-dateutil, snapshottest, tox, traitlets, virtualenv
 snapshottest==0.5.1
 snowballstemmer==2.0.0    # via pydocstyle
 sorl-thumbnail==12.6.3
 sqlparse==0.3.1           # via django
-tblib==1.6.0
+tblib==1.7.0
 termcolor==1.1.0          # via snapshottest
 toml==0.10.1              # via autopep8, black, pre-commit, pylint, tox
-tox==3.15.2
+tox==3.20.0
 traitlets==4.3.3          # via ipython
 typed-ast==1.4.1          # via astroid, black, mypy
-typing-extensions==3.7.4.2  # via mypy
-virtualenv==20.0.25       # via pre-commit, tox
+typing-extensions==3.7.4.3  # via black, mypy
+virtualenv==20.0.31       # via pre-commit, tox
 voluptuous==0.11.7
 wasmer==0.4.1             # via fastdiff
 wcwidth==0.2.5            # via prompt-toolkit
