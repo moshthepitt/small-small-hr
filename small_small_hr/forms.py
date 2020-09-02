@@ -3,7 +3,7 @@ from datetime import datetime, time
 
 from django import forms
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User  # pylint: disable = imported-auth-user
 from django.db.models import Q
 from django.utils.translation import ugettext as _
 
@@ -526,6 +526,7 @@ class StaffProfileAdminForm(forms.ModelForm):
             "emergency_contact_name",
             "emergency_contact_number",
             "emergency_contact_relationship",
+            "supervisor",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -544,6 +545,7 @@ class StaffProfileAdminForm(forms.ModelForm):
         self.helper.layout = Layout(
             Field("first_name",),
             Field("last_name",),
+            Field("supervisor",),
             Field("image",),
             Field("phone",),
             Field("id_number",),
@@ -660,6 +662,7 @@ class StaffProfileAdminCreateForm(StaffProfileAdminForm):
             "user",
             "first_name",
             "last_name",
+            "supervisor",
             "id_number",
             "image",
             "phone",
@@ -697,6 +700,7 @@ class StaffProfileAdminCreateForm(StaffProfileAdminForm):
             Field("user",),
             Field("first_name",),
             Field("last_name",),
+            Field("supervisor",),
             Field("image",),
             Field("phone",),
             Field("id_number",),

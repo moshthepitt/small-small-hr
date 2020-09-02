@@ -507,7 +507,7 @@ def get_days(start: object, end: object):
         yield local_start.date() + timedelta(days=i)
 
 
-def get_taken_leave_days(  # pylint: disable=bad-continuation
+def get_taken_leave_days(
     staffprofile: object, status: str, leave_type: str, start_year: int, end_year: int
 ):
     """
