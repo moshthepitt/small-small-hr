@@ -1190,6 +1190,9 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         """Test StaffProfileAdminCreateForm."""
         user = mommy.make("auth.User")
 
+        manager = mommy.make("auth.User", username="manager")
+        managerprofile = mommy.make("small_small_hr.StaffProfile", user=manager)
+
         request = self.factory.get("/")
         request.session = {}
         request.user = AnonymousUser()
@@ -1217,6 +1220,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
                 "start_date": "2017-09-25",
                 "end_date": "2018-12-31",
                 "image": image_file,
+                "supervisor": managerprofile.pk,
             }
 
             file_dict = {
@@ -1241,6 +1245,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             self.assertEqual(21, staffprofile.leave_days)
             self.assertEqual(9, staffprofile.sick_days)
             self.assertEqual(True, staffprofile.overtime_allowed)
+            self.assertEqual(managerprofile, staffprofile.supervisor)
 
             self.assertEqual("This is the address.", staffprofile.address)
             self.assertEqual("1996-01-27", str(staffprofile.birthday))
@@ -1261,6 +1266,9 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
 
     def test_staff_profile_admin_form(self):
         """Test StaffProfileAdminForm."""
+        manager = mommy.make("auth.User", username="manager")
+        managerprofile = mommy.make("small_small_hr.StaffProfile", user=manager)
+
         user = mommy.make("auth.User")
         staffprofile = mommy.make("small_small_hr.StaffProfile", user=user)
 
@@ -1291,6 +1299,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
                 "start_date": "2017-09-25",
                 "end_date": "2018-12-31",
                 "image": image_file,
+                "supervisor": managerprofile.pk,
             }
 
             file_dict = {
@@ -1315,6 +1324,7 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
             self.assertEqual(21, staffprofile.leave_days)
             self.assertEqual(9, staffprofile.sick_days)
             self.assertEqual(True, staffprofile.overtime_allowed)
+            self.assertEqual(managerprofile, staffprofile.supervisor)
 
             self.assertEqual("This is the address.", staffprofile.address)
             self.assertEqual("1996-01-27", str(staffprofile.birthday))
