@@ -1,5 +1,5 @@
 """Module to test small_small_hr models."""
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines,hard-coded-auth-user
 import os
 from datetime import date, datetime, timedelta
 
@@ -11,6 +11,7 @@ from django.test import RequestFactory, TestCase, override_settings
 
 import pytz
 from model_mommy import mommy
+from model_mommy.recipe import Recipe
 from model_reviews.models import ModelReview
 
 from small_small_hr.forms import (
@@ -39,6 +40,17 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
     def setUp(self):
         """Set up test class."""
         self.factory = RequestFactory()
+        StaffProfile.objects.rebuild()
+        self.manager = mommy.make(
+            "auth.User", first_name="Jane", last_name="Ndoe", email="jane@example.com"
+        )
+        self.user = mommy.make(
+            "auth.User", first_name="Bob", last_name="Ndoe", email="bob@example.com"
+        )
+        manager_mommy = Recipe(StaffProfile, lft=None, rght=None, user=self.manager)
+        staff_mommy = Recipe(StaffProfile, lft=None, rght=None, user=self.user)
+        self.manager_profile = manager_mommy.make()
+        self.staffprofile = staff_mommy.make()
 
     def test_annual_leave_form(self):
         """Test AnnualLeaveForm."""
@@ -1266,11 +1278,9 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
 
     def test_staff_profile_admin_form(self):
         """Test StaffProfileAdminForm."""
-        manager = mommy.make("auth.User", username="manager")
-        managerprofile = mommy.make("small_small_hr.StaffProfile", user=manager)
-
-        user = mommy.make("auth.User")
-        staffprofile = mommy.make("small_small_hr.StaffProfile", user=user)
+        managerprofile = self.manager_profile
+        user = self.user
+        staffprofile = self.staffprofile
 
         request = self.factory.get("/")
         request.session = {}
