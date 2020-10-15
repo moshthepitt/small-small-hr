@@ -11,6 +11,8 @@ from model_mommy import mommy
 from small_small_hr.models import FreeDay, Leave, get_taken_leave_days
 from small_small_hr.utils import create_free_days
 
+# pylint: disable=hard-coded-auth-user
+
 
 class TestModels(TestCase):
     """Test class for models."""
@@ -40,6 +42,47 @@ class TestModels(TestCase):
                 date=the_date,
             ).__str__(),
         )
+
+    @override_settings(
+        SSHR_DAY_LEAVE_VALUES={
+            1: 1,  # Monday
+            2: 1,  # Tuesday
+            3: 1,  # Wednesday
+            4: 1,  # Thursday
+            5: 1,  # Friday
+            6: 0.5,  # Saturday
+            7: 0,  # Sunday
+        }
+    )
+    def test_leave_day_count(self):
+        """Test leave object day_count."""
+        user = mommy.make("auth.User", first_name="Mosh", last_name="Pitt")
+        staff = mommy.make("small_small_hr.StaffProfile", user=user)
+        mommy.make(
+            "small_small_hr.AnnualLeave",
+            staff=staff,
+            year=2017,
+            leave_type=Leave.REGULAR,
+            allowed_days=21,
+        )
+        mommy.make(
+            "small_small_hr.FreeDay",
+            name="RANDOM HOLIDAY",
+            date=date(day=15, month=6, year=2017),
+        )
+        # 9.5 days of leave ==> Sun not counted, Sat = 0.5 and 15/6/2017 is holiday
+        start = datetime(2017, 6, 5, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        end = datetime(2017, 6, 16, 0, 0, 0, tzinfo=pytz.timezone(settings.TIME_ZONE))
+        leave_obj = mommy.make(
+            "small_small_hr.Leave",
+            staff=staff,
+            start=start,
+            end=end,
+            leave_type=Leave.REGULAR,
+            review_status=Leave.APPROVED,
+        )
+
+        self.assertEqual(9.5, leave_obj.day_count)
 
     @override_settings(
         SSHR_DAY_LEAVE_VALUES={

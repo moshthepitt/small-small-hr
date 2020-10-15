@@ -1,4 +1,5 @@
 """Module to test small_small_hr Emails."""
+# pylint: disable=hard-coded-auth-user
 from datetime import datetime
 
 from django.conf import settings
