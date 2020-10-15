@@ -347,6 +347,15 @@ class Leave(BaseStaffRequest):
         """Get duration as a property."""
         return self.get_duration()
 
+    @cached_property
+    def day_count(self):
+        """
+        Get the number of leave days as a property.
+
+        This takes into account holidays and weekend policy.
+        """
+        return get_real_leave_duration(leave_obj=self)
+
 
 class OverTime(BaseStaffRequest):
     """Overtime model class."""
@@ -505,6 +514,24 @@ def get_days(start: object, end: object):
     span = local_end.date() - local_start.date()
     for i in range(span.days + 1):
         yield local_start.date() + timedelta(days=i)
+
+
+def get_real_leave_duration(leave_obj: Leave) -> Decimal:
+    """
+    Get the real leave duration.
+
+    Takes into account public holidays, weekends and weekend policy
+    """
+    count = Decimal(0)
+    free_days = FreeDay.objects.filter(
+        date__gte=leave_obj.start.date(), date__lte=leave_obj.end.date()
+    ).values_list("date", flat=True)
+    days = get_days(start=leave_obj.start, end=leave_obj.end)
+    for day in days:
+        if day not in free_days:
+            day_value = settings.SSHR_DAY_LEAVE_VALUES[day.isoweekday()]
+            count = count + Decimal(day_value)
+    return count
 
 
 def get_taken_leave_days(
