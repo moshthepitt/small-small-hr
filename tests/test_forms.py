@@ -96,6 +96,50 @@ class TestForms(TestCase):  # pylint: disable=too-many-public-methods
         self.assertEqual(5, annual_leave.carried_over_days)
         self.assertEqual(Leave.REGULAR, annual_leave.leave_type)
 
+    def test_annual_leave_form_decimals(self):
+        """Test AnnualLeaveForm with decimal days."""
+        user = mommy.make("auth.User", first_name="Bob", last_name="Ndoe")
+        staffprofile = mommy.make("small_small_hr.StaffProfile", user=user)
+
+        request = self.factory.get("/")
+        request.session = {}
+        request.user = AnonymousUser()
+
+        data = {
+            "staff": staffprofile.id,
+            "year": 2018,
+            "leave_type": Leave.REGULAR,
+            "allowed_days": 16.5,
+            "carried_over_days": 8.5,
+        }
+
+        form = AnnualLeaveForm(data=data)
+        self.assertTrue(form.is_valid())
+        annual_leave = form.save()
+        self.assertEqual(staffprofile, annual_leave.staff)
+        self.assertEqual(2018, annual_leave.year)
+        self.assertEqual(16.5, annual_leave.allowed_days)
+        self.assertEqual(8.5, annual_leave.carried_over_days)
+        self.assertEqual(Leave.REGULAR, annual_leave.leave_type)
+
+        data2 = {
+            "staff": staffprofile.id,
+            "year": 2017,
+            "leave_type": Leave.REGULAR,
+            "allowed_days": 21,
+            "carried_over_days": 5,
+        }
+
+        form = AnnualLeaveForm(data=data2, instance=annual_leave)
+        self.assertTrue(form.is_valid())
+        form.save()
+        annual_leave.refresh_from_db()
+        self.assertEqual(staffprofile, annual_leave.staff)
+        self.assertEqual(2017, annual_leave.year)
+        self.assertEqual(21, annual_leave.allowed_days)
+        self.assertEqual(5, annual_leave.carried_over_days)
+        self.assertEqual(Leave.REGULAR, annual_leave.leave_type)
+
     def test_role_form(self):
         """Test RoleForm."""
         request = self.factory.get("/")
