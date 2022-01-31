@@ -437,7 +437,7 @@ class AnnualLeave(TimeStampedModel, models.Model):
         blank=True,
         decimal_places=1,
         max_digits=12,
-        validators=[MinValueValidator(Decimal('0.1'))],
+        validators=[MinValueValidator(Decimal('0'))],
         help_text=_("Number of leave days carried over into this year."),
     )
 
