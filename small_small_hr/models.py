@@ -6,6 +6,7 @@ from typing import Optional
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.core.validators import MinValueValidator
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -421,16 +422,22 @@ class AnnualLeave(TimeStampedModel, models.Model):
     leave_type = models.CharField(
         _("Type"), max_length=1, choices=Leave.TYPE_CHOICES, db_index=True
     )
-    allowed_days = models.PositiveIntegerField(
+    allowed_days = models.DecimalField(
         _("Allowed Leave days"),
         default=21,
         blank=True,
+        decimal_places=1,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal('0.1'))],
         help_text=_("Number of leave days allowed in a year."),
     )
-    carried_over_days = models.PositiveIntegerField(
+    carried_over_days = models.DecimalField(
         _("Carried Over Leave days"),
         default=0,
         blank=True,
+        decimal_places=1,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal('0.1'))],
         help_text=_("Number of leave days carried over into this year."),
     )
 
