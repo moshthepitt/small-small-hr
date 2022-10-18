@@ -58,7 +58,7 @@ pre-commit==2.7.1         # via -r requirements/dev.in
 prompt-toolkit==3.0.7     # via ipython
 psycopg2-binary==2.8.6    # via -r requirements/dev.in, small-small-hr
 ptyprocess==0.6.0         # via pexpect
-py==1.9.0                 # via tox
+py==1.10.0                 # via tox
 pycodestyle==2.6.0        # via -r requirements/dev.in, autopep8, flake8
 pydocstyle==5.1.1         # via -r requirements/dev.in
 pyflakes==2.2.0           # via flake8
