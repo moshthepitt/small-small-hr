@@ -34,7 +34,7 @@ identify==1.5.5           # via pre-commit
 importlib-metadata==1.7.0  # via flake8, pluggy, pre-commit, tox, virtualenv
 ipdb==0.13.4              # via -r requirements/dev.in
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.18.1           # via ipdb
+ipython==8.10.0           # via ipdb
 isort==5.5.4              # via -r requirements/dev.in, pylint
 jedi==0.17.2              # via ipython
 lazy-object-proxy==1.4.3  # via astroid
