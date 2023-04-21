@@ -75,7 +75,7 @@ six==1.15.0               # via astroid, django-braces, django-contrib-comments,
 snapshottest==0.6.0       # via -r requirements/dev.in
 snowballstemmer==2.0.0    # via pydocstyle
 sorl-thumbnail==12.6.3    # via small-small-hr
-sqlparse==0.3.1           # via django
+sqlparse==0.4.4           # via django
 tblib==1.7.0              # via -r requirements/dev.in
 termcolor==1.1.0          # via snapshottest
 toml==0.10.1              # via autopep8, black, pre-commit, pylint, tox
