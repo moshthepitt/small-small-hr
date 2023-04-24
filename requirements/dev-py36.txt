@@ -52,7 +52,7 @@ pep8==1.7.1               # via -r requirements/dev.in
 pexpect==4.8.0            # via ipython
 phonenumberslite==8.12.10  # via small-small-hr
 pickleshare==0.7.5        # via ipython
-pillow==7.2.0             # via small-small-hr
+pillow==9.3.0             # via small-small-hr
 pluggy==0.13.1            # via tox
 pre-commit==2.7.1         # via -r requirements/dev.in
 prompt-toolkit==3.0.7     # via ipython
